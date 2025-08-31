@@ -34,7 +34,7 @@ jobs:
 
       - name: Zip deploy package
         run: |
-          zip -r deploy.zip client/build server package.json package-lock.json
+          zip -r deploy.zip client/build server
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
