@@ -1,43 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admuse Easy Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Admuse Easy</h1>
+    <nav>
+      <!-- Add navigation links if needed -->
+    </nav>
+  </header>
+  <main>
+    <section class="input-section">
+      <div class="input-group">
+        <label for="product-name">Product Name</label>
+        <input id="product-name" type="text" placeholder="e.g. Organic lemongrass soap">
+      </div>
+      <div class="input-group">
+        <label for="product-desc">Description</label>
+        <textarea id="product-desc" placeholder="Describe your product..."></textarea>
+      </div>
+      <div class="input-group">
+        <label for="product-audience">Target Audience</label>
+        <input id="product-audience" type="text" placeholder="e.g. Eco-conscious millennials">
+      </div>
+      <div class="input-group">
+        <label>Mascot & Mood</label>
+        <div class="mascot-cards">
+          <div class="mascot-card" data-mascot="capybara">
+            <img src="mascot-capybara.png" alt="Cozy Capybara">
+            <div class="mascot-info">
+              <h3>🧸 Cozy Capybara</h3>
+              <p>Calming, minimalist layouts with soft copy</p>
+            </div>
+          </div>
+          <div class="mascot-card" data-mascot="hamster">
+            <img src="mascot-hamster.png" alt="Hype Hamster">
+            <div class="mascot-info">
+              <h3>🐹 Hype Hamster</h3>
+              <p>Energetic, punchy headlines and bold visuals</p>
+            </div>
+          </div>
+          <div class="mascot-card" data-mascot="parrot">
+            <img src="mascot-parrot.png" alt="Pixel Parrot">
+            <div class="mascot-info">
+              <h3>🦜 Pixel Parrot</h3>
+              <p>Quirky, clever copy and layout tweaks</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="input-group">
+        <label for="output-format">Output Format</label>
+        <select id="output-format">
+          <option value="billboard">Billboard</option>
+          <option value="instagram">Instagram Reel</option>
+          <option value="landing">Landing Page</option>
+        </select>
+      </div>
+      <button id="generate-btn">Generate Ad</button>
+    </section>
+    <section id="result-section" class="result-section" style="display:none;">
+      <h2>Generated Ad</h2>
+      <div id="ad-layout"></div>
+      <div id="ad-copy"></div>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2025 Admuse Easy. All rights reserved.</p>
+  </footer>
+  <script src="app.js"></script>
+</body>
 </html>
