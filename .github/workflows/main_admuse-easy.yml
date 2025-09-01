@@ -32,14 +32,16 @@ jobs:
           cd server
           npm ci
 
-      - name: Zip deploy package
+      - name: Create deployment structure
         run: |
-          zip -r deploy.zip client/build server
-
+          mkdir deploy
+          cp -r server/* deploy/
+          mkdir -p deploy/client/build
+          cp -r client/build/* deploy/client/build/
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'Admuse-Easy'
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: deploy.zip
+          package: deploy 
