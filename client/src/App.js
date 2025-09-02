@@ -25,12 +25,8 @@ function App() {
   };
 
   const handleGenerate = async () => {
-    const API_URL = process.env.NODE_ENV === 'production' 
-      ? 'https://admuse-easy-api.azurewebsites.net'
-      : 'http://localhost:5000';
-    
     try {
-      const response = await fetch(`${API_URL}/api/generate-copy`, {
+      const response = await fetch('/api/generate-copy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product, mascot })
