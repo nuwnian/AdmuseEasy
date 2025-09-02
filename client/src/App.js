@@ -83,8 +83,11 @@ function App() {
             {mascots.map(m => (
               <label key={m.key} className={mascot === m.key ? 'selected' : ''}>
                 <input type="radio" name="mascot" value={m.key} checked={mascot === m.key} onChange={() => setMascot(m.key)} />
-                <span className="emoji">{m.emoji}</span> <b>{m.name}</b> <span className="mood">({m.mood})</span>
-                <div className="desc">{m.description}</div>
+                <span className="emoji">{m.emoji}</span>
+                <div className="mascot-info">
+                  <div><b>{m.name}</b> <span className="mood">({m.mood})</span></div>
+                  <div className="desc">{m.description}</div>
+                </div>
               </label>
             ))}
           </div>
@@ -122,6 +125,11 @@ function App() {
         </div>
       )}
       </div>
+      
+      {/* Footer */}
+      <footer className="footer">
+        <p>© 2025 AdmuseEasy • Made with 💙 for creative marketers</p>
+      </footer>
     </div>
   );
 }
