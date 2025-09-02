@@ -5,6 +5,63 @@ body {
   color: #2d3a4a;
 }
 
+.app {
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  background: #4f8cff;
+  color: white;
+  padding: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.nav-links a:hover {
+  opacity: 0.8;
+}
+
+/* Mobile navbar */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  
+  .nav-logo {
+    font-size: 1.3rem;
+  }
+}
+
 .dashboard {
   max-width: 700px;
   margin: 2em auto;
@@ -13,6 +70,15 @@ body {
   box-shadow: 0 2px 16px #0001;
   padding: 2em 2.5em 2.5em 2.5em;
   font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .dashboard {
+    margin: 1em;
+    padding: 1.5em;
+    border-radius: 0.8em;
+  }
 }
 
 .dashboard h1 {
@@ -55,6 +121,26 @@ body {
   display: flex;
   gap: 1em;
   flex-wrap: wrap;
+}
+
+/* Mobile mascot cards */
+@media (max-width: 768px) {
+  .mascot-options {
+    flex-direction: column;
+  }
+  
+  .mascot-options label {
+    min-width: auto;
+    flex-direction: row;
+    text-align: left;
+    padding: 1rem;
+  }
+  
+  .input-group input,
+  .input-group textarea,
+  .input-group select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
 
 .mascot-options label {
@@ -117,6 +203,32 @@ body {
 }
 .generate-btn:hover {
   background: #2566c7;
+}
+
+.generate-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 .result-section {
   margin-top: 2.5em;

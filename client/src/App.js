@@ -19,12 +19,14 @@ function App() {
   const [mascot, setMascot] = useState(mascots[0].key);
   const [format, setFormat] = useState(formats[0].key);
   const [adResult, setAdResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleInput = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
   const handleGenerate = async () => {
+    setLoading(true);
     try {
       const response = await fetch('/api/generate-copy', {
         method: 'POST',
@@ -42,12 +44,26 @@ function App() {
     } catch (error) {
       console.error('Failed to generate ad:', error);
       alert('Failed to generate ad. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="dashboard">
-      <h1>Admuse Easy</h1>
+    <div className="app">
+      {/* Navbar */}
+      <nav className="navbar">
+        <div className="nav-container">
+          <h1 className="nav-logo">🎭 AdmuseEasy</h1>
+          <div className="nav-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+          </div>
+        </div>
+      </nav>
+
+      <div className="dashboard">
       <div className="input-section">
         <div className="input-group">
           <label>Product Name</label>
@@ -81,7 +97,16 @@ function App() {
             ))}
           </select>
         </div>
-        <button className="generate-btn" onClick={handleGenerate}>Generate Ad</button>
+        <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
+          {loading ? (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+              Generating...
+            </div>
+          ) : (
+            'Generate Ad'
+          )}
+        </button>
       </div>
       {adResult && (
         <div className="result-section">
@@ -96,6 +121,7 @@ function App() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
