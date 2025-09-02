@@ -63,12 +63,12 @@ body {
 }
 
 .dashboard {
-  max-width: 700px;
+  max-width: 1200px;
   margin: 2em auto;
   background: #fff;
   border-radius: 1em;
   box-shadow: 0 2px 16px #0001;
-  padding: 2em 2.5em 2.5em 2.5em;
+  padding: 3em 4em;
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
@@ -76,8 +76,18 @@ body {
 @media (max-width: 768px) {
   .dashboard {
     margin: 1em;
-    padding: 1.5em;
+    padding: 2em;
     border-radius: 0.8em;
+    max-width: 95%;
+  }
+  
+  .mascot-options {
+    flex-direction: column;
+    gap: 1em;
+  }
+  
+  .mascot-options label {
+    padding: 1.2em;
   }
 }
 
@@ -107,10 +117,10 @@ body {
 .input-group input,
 .input-group textarea,
 .input-group select {
-  padding: 0.6em;
-  border-radius: 0.4em;
+  padding: 1em;
+  border-radius: 0.5em;
   border: 1px solid #cfd8dc;
-  font-size: 1em;
+  font-size: 1.1em;
 }
 
 .input-group textarea {
@@ -119,8 +129,9 @@ body {
 }
 .mascot-options {
   display: flex;
-  gap: 1em;
-  flex-wrap: wrap;
+  gap: 1.5em;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
 
 /* Mobile mascot cards */
@@ -146,16 +157,15 @@ body {
 .mascot-options label {
   background: #f4f4f4;
   border-radius: 0.7em;
-  padding: 1em;
+  padding: 1.5em;
   cursor: pointer;
   border: 2px solid transparent;
   flex: 1;
-  min-width: 200px;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.8em;
+  gap: 1em;
   box-shadow: 0 1px 4px #0001;
   animation: mascot-in 0.7s ease;
 }
@@ -217,13 +227,13 @@ body {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .generate-btn {
-  margin-top: 1.5em;
-  padding: 0.8em 2.5em;
-  font-size: 1.1em;
+  margin-top: 2em;
+  padding: 1.2em 3em;
+  font-size: 1.2em;
   background: #4f8cff;
   color: #fff;
   border: none;
-  border-radius: 0.5em;
+  border-radius: 0.6em;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s;
