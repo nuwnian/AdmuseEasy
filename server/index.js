@@ -65,9 +65,17 @@ app.post('/api/generate-copy', validateInput, (req, res) => {
   res.json({ copy });
 });
 
+// Serve React build files
+app.use(express.static(path.join(__dirname, 'client/build')));
+
 // Health check endpoint
-app.get('/', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ message: 'AdmuseEasy API is running!' });
+});
+
+// Fallback: serve React index.html for any unknown route (SPA support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
 });
 
 app.listen(PORT, () => {
