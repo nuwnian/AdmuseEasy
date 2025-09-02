@@ -15,25 +15,57 @@ document.getElementById('generate-btn').addEventListener('click', () => {
   const audience = document.getElementById('product-audience').value;
   const format = document.getElementById('output-format').value;
   if (!selectedMascot) {
-    alert('Please select a mascot!');
+    document.getElementById('error-message').textContent = 'Please select a mascot!';
     return;
   }
   // Placeholder: Show a simple generated ad
   document.getElementById('result-section').style.display = 'block';
-  document.getElementById('ad-layout').innerHTML = `
-    <div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>
-      <h1>${name || 'Product Name'}</h1>
-      <h2>${selectedMascot}</h2>
-      <p>${description || 'Product description goes here.'}</p>
-      <p><em>For: ${audience || 'Target Audience'}</em></p>
-      <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>Buy Now</button>
-    </div>
-  `;
-  document.getElementById('ad-copy').innerHTML = `
-    <h3>Copywriting</h3>
-    <p><b>Headline:</b> Experience ${name || 'our product'}!</p>
-    <p><b>Tagline:</b> Perfect for ${audience || 'everyone'}.</p>
-    <p><b>CTA:</b> Buy Now</p>
-    <p><b>Blurb:</b> ${description || 'Discover the benefits today!'}</p>
-  `;
+  // Security: Use textContent instead of innerHTML to prevent XSS
+  const adLayout = document.getElementById('ad-layout');
+  adLayout.innerHTML = '';
+  const adDiv = document.createElement('div');
+  adDiv.style.cssText = 'padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;';
+  
+  const h1 = document.createElement('h1');
+  h1.textContent = name || 'Product Name';
+  const h2 = document.createElement('h2');
+  h2.textContent = selectedMascot;
+  const p1 = document.createElement('p');
+  p1.textContent = description || 'Product description goes here.';
+  const p2 = document.createElement('p');
+  const em = document.createElement('em');
+  em.textContent = `For: ${audience || 'Target Audience'}`;
+  p2.appendChild(em);
+  const button = document.createElement('button');
+  button.textContent = 'Buy Now';
+  button.style.cssText = 'margin-top:1em;padding:0.5em 2em;font-size:1.2em;';
+  
+  adDiv.appendChild(h1);
+  adDiv.appendChild(h2);
+  adDiv.appendChild(p1);
+  adDiv.appendChild(p2);
+  adDiv.appendChild(button);
+  adLayout.appendChild(adDiv);
+  // Security: Use textContent to prevent XSS
+  const adCopy = document.getElementById('ad-copy');
+  adCopy.innerHTML = '';
+  const h3 = document.createElement('h3');
+  h3.textContent = 'Copywriting';
+  const p1 = document.createElement('p');
+  p1.innerHTML = '<b>Headline:</b> ';
+  p1.appendChild(document.createTextNode(`Experience ${name || 'our product'}!`));
+  const p2 = document.createElement('p');
+  p2.innerHTML = '<b>Tagline:</b> ';
+  p2.appendChild(document.createTextNode(`Perfect for ${audience || 'everyone'}.`));
+  const p3 = document.createElement('p');
+  p3.innerHTML = '<b>CTA:</b> Buy Now';
+  const p4 = document.createElement('p');
+  p4.innerHTML = '<b>Blurb:</b> ';
+  p4.appendChild(document.createTextNode(description || 'Discover the benefits today!'));
+  
+  adCopy.appendChild(h3);
+  adCopy.appendChild(p1);
+  adCopy.appendChild(p2);
+  adCopy.appendChild(p3);
+  adCopy.appendChild(p4);
 });

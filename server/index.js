@@ -1,17 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'build')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
+// Security headers
+app.use(helmet());
+
+// Security: Restrict CORS to specific origins
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://admuse-easy.azurewebsites.net'] 
+    : ['http://localhost:3000']
+}));
+app.use(express.json({ limit: '10mb' }));
 // Serve React build static files
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -37,12 +41,29 @@ const mascotCopy = {
   })
 };
 
-// API: Generate ad copy
-app.post('/api/generate-copy', (req, res) => {
+// Input validation middleware
+const validateInput = (req, res, next) => {
   const { product, mascot } = req.body;
-  if (!product || !mascot || !mascotCopy[mascot]) {
-    return res.status(400).json({ error: 'Missing or invalid input.' });
+  
+  if (!product || typeof product !== 'object') {
+    return res.status(400).json({ error: 'Invalid product data' });
   }
+  
+  if (!mascot || typeof mascot !== 'string' || !mascotCopy[mascot]) {
+    return res.status(400).json({ error: 'Invalid mascot selection' });
+  }
+  
+  // Sanitize string inputs
+  if (product.name) product.name = product.name.toString().slice(0, 100);
+  if (product.description) product.description = product.description.toString().slice(0, 500);
+  if (product.audience) product.audience = product.audience.toString().slice(0, 100);
+  
+  next();
+};
+
+// API: Generate ad copy
+app.post('/api/generate-copy', validateInput, (req, res) => {
+  const { product, mascot } = req.body;
   const copy = mascotCopy[mascot](product);
   res.json({ copy });
 });
