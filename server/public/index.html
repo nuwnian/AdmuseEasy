@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdmuseEasy - Mascot Ad Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .mascot-card { border: 2px solid #ddd; padding: 15px; margin: 10px; cursor: pointer; border-radius: 8px; }
+        .mascot-card.selected { border-color: #007cba; background: #f0f8ff; }
+        input, textarea, select { width: 100%; padding: 8px; margin: 5px 0; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        #result-section { margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🎭 AdmuseEasy - Mascot Ad Generator</h1>
+    
+    <h2>Product Details</h2>
+    <input type="text" id="product-name" placeholder="Product Name">
+    <textarea id="product-desc" placeholder="Product Description" rows="3"></textarea>
+    <input type="text" id="product-audience" placeholder="Target Audience">
+    
+    <h2>Choose Your Mascot</h2>
+    <div class="mascot-card" data-mascot="capybara">
+        <h3>🦫 Capybara - Calm & Gentle</h3>
+        <p>Perfect for wellness, relaxation, and comfort products</p>
+    </div>
+    <div class="mascot-card" data-mascot="hamster">
+        <h3>🐹 Hamster - Energetic & Zesty</h3>
+        <p>Great for energy drinks, fitness, and active lifestyle products</p>
+    </div>
+    <div class="mascot-card" data-mascot="parrot">
+        <h3>🦜 Parrot - Fun & Wild</h3>
+        <p>Ideal for creative, colorful, and playful products</p>
+    </div>
+    
+    <h2>Output Format</h2>
+    <select id="output-format">
+        <option value="billboard">Billboard</option>
+        <option value="instagram">Instagram Reel</option>
+        <option value="landing">Landing Page</option>
+    </select>
+    
+    <button id="generate-btn">Generate Ad Copy</button>
+    
+    <div id="result-section" style="display:none;">
+        <h2>Generated Ad</h2>
+        <div id="ad-layout"></div>
+        <div id="ad-copy"></div>
+    </div>
+
+    <script>
+        const mascotCards = document.querySelectorAll('.mascot-card');
+        let selectedMascot = null;
+        
+        mascotCards.forEach(card => {
+            card.addEventListener('click', () => {
+                mascotCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedMascot = card.getAttribute('data-mascot');
+            });
+        });
+        
+        document.getElementById('generate-btn').addEventListener('click', async () => {
+            const name = document.getElementById('product-name').value;
+            const description = document.getElementById('product-desc').value;
+            const audience = document.getElementById('product-audience').value;
+            
+            if (!selectedMascot) {
+                alert('Please select a mascot!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/generate-copy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product: { name, description, audience },
+                        mascot: selectedMascot
+                    })
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('result-section').style.display = 'block';
+                document.getElementById('ad-layout').innerHTML = `
+                    <div style="padding:20px; background:#f4f4f4; border-radius:10px; text-align:center;">
+                        <h1>${data.copy.headline}</h1>
+                        <h3>${data.copy.tagline}</h3>
+                        <p>${data.copy.blurb}</p>
+                        <button style="margin-top:15px; padding:10px 30px; font-size:16px;">${data.copy.cta}</button>
+                    </div>
+                `;
+                
+                document.getElementById('ad-copy').innerHTML = `
+                    <h3>Copy Details</h3>
+                    <p><strong>Headline:</strong> ${data.copy.headline}</p>
+                    <p><strong>Tagline:</strong> ${data.copy.tagline}</p>
+                    <p><strong>CTA:</strong> ${data.copy.cta}</p>
+                    <p><strong>Blurb:</strong> ${data.copy.blurb}</p>
+                `;
+            } catch (error) {
+                alert('Error generating ad copy');
+            }
+        });
+    </script>
+</body>
+</html>
