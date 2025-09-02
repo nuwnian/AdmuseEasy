@@ -41,4 +41,4 @@ How quickly non-tech users can create fun, professional ads with just a few clic
 
 ---
 
-Built for the [Your Hackathon Name] hackathon.
+

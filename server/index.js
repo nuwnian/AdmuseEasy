@@ -12,13 +12,10 @@ app.use(helmet());
 // Security: Restrict CORS to specific origins
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://admuse-easy.azurewebsites.net'] 
+    ? ['https://admuse-easy.azurewebsites.net', 'https://your-frontend-domain.azurewebsites.net'] 
     : ['http://localhost:3000']
 }));
 app.use(express.json({ limit: '10mb' }));
-// Serve React build files
-app.use(express.static(path.join(__dirname, 'client/build')));
-
 // Mascot slogan logic
 const mascotCopy = {
   capybara: (product) => ({
@@ -68,9 +65,9 @@ app.post('/api/generate-copy', validateInput, (req, res) => {
   res.json({ copy });
 });
 
-// Fallback: serve React index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build/index.html'));
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ message: 'AdmuseEasy API is running!' });
 });
 
 app.listen(PORT, () => {

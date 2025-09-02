@@ -24,18 +24,29 @@ function App() {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
-  const handleGenerate = () => {
-    // Placeholder: In real app, call backend API
-    setAdResult({
-      layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>\n  <h1>${product.name || 'Product Name'}</h1>\n  <h2>${mascots.find(m => m.key === mascot).emoji} ${mascots.find(m => m.key === mascot).name}</h2>\n  <p>${product.description || 'Product description goes here.'}</p>\n  <p><em>For: ${product.audience || 'Target Audience'}</em></p>\n  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>Buy Now</button>\n</div>`,
-      copy: {
-        headline: `Experience ${mascots.find(m => m.key === mascot).mood} with ${product.name || 'our product'}!`,
-        tagline: `Perfect for ${product.audience || 'everyone'}.`,
-        cta: 'Buy Now',
-        blurb: product.description || 'Discover the benefits today!'
-      },
-      format: formats.find(f => f.key === format).label
-    });
+  const handleGenerate = async () => {
+    const API_URL = process.env.NODE_ENV === 'production' 
+      ? 'https://admuse-easy-api.azurewebsites.net'
+      : 'http://localhost:5000';
+    
+    try {
+      const response = await fetch(`${API_URL}/api/generate-copy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product, mascot })
+      });
+      
+      const data = await response.json();
+      
+      setAdResult({
+        layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>\n  <h1>${product.name || 'Product Name'}</h1>\n  <h2>${mascots.find(m => m.key === mascot).emoji} ${mascots.find(m => m.key === mascot).name}</h2>\n  <p>${product.description || 'Product description goes here.'}</p>\n  <p><em>For: ${product.audience || 'Target Audience'}</em></p>\n  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>${data.copy.cta}</button>\n</div>`,
+        copy: data.copy,
+        format: formats.find(f => f.key === format).label
+      });
+    } catch (error) {
+      console.error('Failed to generate ad:', error);
+      alert('Failed to generate ad. Please try again.');
+    }
   };
 
   return (

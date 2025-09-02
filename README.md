@@ -34,14 +34,14 @@ AI powers the mascot logic and is designed to generate creative, brand-consisten
    - Frontend: `npm start` (from `client` folder)
 4. Open [http://localhost:3000](http://localhost:3000) to view the app
 
-## Demo
-- [Demo Video Link Here]
-- [Live Site Link Here (if deployed)]
+## Live Site
+- https://admuse-easy.azurewebsites.net/
+
 
 ## What surprised us?
 How quickly non-tech users can create fun, professional ads with just a few clicks—and how much personality mascots add to the creative process!
 
 ---
 
-Built for the [Your Hackathon Name] hackathon.
+
 >>>>>>> 09073dc431e328a317a282422ef76c5e50531120
