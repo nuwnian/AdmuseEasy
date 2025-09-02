@@ -30,8 +30,9 @@ jobs:
 
     - name: Copy client build to server
       run: |
-        rm -rf server/build
-        cp -r client/build server/
+        rm -rf server/client
+        mkdir -p server/client
+        cp -r client/build server/client/
     
     - name: Install server dependencies
       run: |

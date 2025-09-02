@@ -16,8 +16,8 @@ app.use(cors({
     : ['http://localhost:3000']
 }));
 app.use(express.json({ limit: '10mb' }));
-// Serve static files from current directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve React build files
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Mascot slogan logic
 const mascotCopy = {
@@ -68,14 +68,9 @@ app.post('/api/generate-copy', validateInput, (req, res) => {
   res.json({ copy });
 });
 
-// Fallback: serve index.html
+// Fallback: serve React index.html
 app.get('*', (req, res) => {
-  const indexPath = path.join(__dirname, 'public', 'index.html');
-  if (require('fs').existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.send('<h1>AdmuseEasy - Mascot Ad Generator</h1><p>API is running at /api/generate-copy</p>');
-  }
+  res.sendFile(path.join(__dirname, 'client/build/index.html'));
 });
 
 app.listen(PORT, () => {
