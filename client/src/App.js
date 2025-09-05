@@ -54,7 +54,10 @@ function App() {
       {/* Navbar */}
       <nav className="navbar">
         <div className="nav-container">
-          <h1 className="nav-logo">🎭 AdmuseEasy</h1>
+          <div className="nav-logo">
+            <img src="/Admuse-Logo.png" alt="AdmuseEasy" className="logo-image" />
+            <span className="logo-text">AdmuseEasy</span>
+          </div>
           <div className="nav-links">
             <a href="#home">Home</a>
             <a href="#about">About</a>

@@ -2,9 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Google Gemini
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 // Security headers
 app.use(helmet());
@@ -16,27 +21,90 @@ app.use(cors({
     : ['http://localhost:3000']
 }));
 app.use(express.json({ limit: '10mb' }));
-// Mascot slogan logic
-const mascotCopy = {
-  capybara: (product) => ({
-    headline: `Gentle Clean, Calm Mind.`,
-    tagline: `Pure comfort in every wash.`,
-    cta: `Relax & Refresh`,
-    blurb: product.description || 'Experience soothing, natural care every day.'
-  }),
-  hamster: (product) => ({
-    headline: `Get Zesty, Get Noticed!`,
-    tagline: `Energize your day with every wash.`,
-    cta: `Feel the Buzz!`,
-    blurb: product.description || 'Unleash your energy with every use.'
-  }),
-  parrot: (product) => ({
-    headline: `Soap That Sings Lemongrass!`,
-    tagline: `Clean, green, and a little bit wild.`,
-    cta: `Lather Up, Stand Out!`,
-    blurb: product.description || 'Make your routine a little more fun.'
-  })
+// Mascot personality prompts for AI
+const mascotPrompts = {
+  capybara: {
+    personality: "calm, zen-like, minimalist, soothing",
+    tone: "gentle, peaceful, relaxing",
+    style: "soft, comforting language with focus on tranquility"
+  },
+  hamster: {
+    personality: "energetic, enthusiastic, bold, dynamic",
+    tone: "exciting, motivational, high-energy",
+    style: "punchy, action-oriented language with exclamation points"
+  },
+  parrot: {
+    personality: "quirky, creative, playful, unique",
+    tone: "fun, witty, clever",
+    style: "creative wordplay and unexpected phrases"
+  }
 };
+
+// AI-powered copy generation
+async function generateAICopy(product, mascot) {
+  const mascotInfo = mascotPrompts[mascot];
+  
+  const prompt = `You are a ${mascotInfo.personality} marketing copywriter creating an ad for:
+
+Product: ${product.name}
+Description: ${product.description}
+Target Audience: ${product.audience}
+
+Create ad copy with a ${mascotInfo.tone} tone using ${mascotInfo.style}.
+
+Generate exactly this JSON format:
+{
+  "headline": "catchy main headline (max 60 chars)",
+  "tagline": "memorable tagline (max 40 chars)",
+  "cta": "call-to-action button text (max 20 chars)",
+  "blurb": "compelling description (max 100 chars)"
+}
+
+Respond only with valid JSON, no other text.`;
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const fullPrompt = `You are a professional marketing copywriter. Always respond with valid JSON only.\n\n${prompt}`;
+    
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+
+    const aiResponse = response.text();
+    return JSON.parse(aiResponse);
+  } catch (error) {
+    console.error('AI generation failed:', error);
+    // Fallback to static copy if AI fails
+    return getFallbackCopy(product, mascot);
+  }
+}
+
+// Fallback static copy (dynamic for any product)
+function getFallbackCopy(product, mascot) {
+  const productName = product.name || 'Your Product';
+  const description = product.description || 'Amazing product for your needs';
+  
+  const fallbackCopy = {
+    capybara: {
+      headline: `${productName} - Find Your Peace`,
+      tagline: `Gentle solutions for mindful living`,
+      cta: `Discover Calm`,
+      blurb: description
+    },
+    hamster: {
+      headline: `${productName} - Energize Your Life!`,
+      tagline: `Bold choices for dynamic people`,
+      cta: `Get Energized!`,
+      blurb: description
+    },
+    parrot: {
+      headline: `${productName} - Uniquely You!`,
+      tagline: `Creative solutions for creative minds`,
+      cta: `Stand Out!`,
+      blurb: description
+    }
+  };
+  return fallbackCopy[mascot];
+}
 
 // Input validation middleware
 const validateInput = (req, res, next) => {
@@ -46,7 +114,7 @@ const validateInput = (req, res, next) => {
     return res.status(400).json({ error: 'Invalid product data' });
   }
   
-  if (!mascot || typeof mascot !== 'string' || !mascotCopy[mascot]) {
+  if (!mascot || typeof mascot !== 'string' || !mascotPrompts[mascot]) {
     return res.status(400).json({ error: 'Invalid mascot selection' });
   }
   
@@ -58,11 +126,16 @@ const validateInput = (req, res, next) => {
   next();
 };
 
-// API: Generate ad copy
-app.post('/api/generate-copy', validateInput, (req, res) => {
-  const { product, mascot } = req.body;
-  const copy = mascotCopy[mascot](product);
-  res.json({ copy });
+// API: Generate ad copy with AI
+app.post('/api/generate-copy', validateInput, async (req, res) => {
+  try {
+    const { product, mascot } = req.body;
+    const copy = await generateAICopy(product, mascot);
+    res.json({ copy, powered_by: 'AI' });
+  } catch (error) {
+    console.error('Copy generation error:', error);
+    res.status(500).json({ error: 'Failed to generate copy' });
+  }
 });
 
 // Serve React build files

@@ -13,7 +13,7 @@ body {
 .navbar {
   background: #4f8cff;
   color: white;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   position: sticky;
   top: 0;
@@ -30,9 +30,23 @@ body {
 }
 
 .nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin: 0;
+}
+
+.logo-image {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(1.2) contrast(1.1); /* Slightly brighter for visibility */
+}
+
+.logo-text {
   font-size: 1.5rem;
   font-weight: 600;
+  color: white;
 }
 
 .nav-links {
@@ -57,7 +71,11 @@ body {
     display: none;
   }
   
-  .nav-logo {
+  .logo-image {
+    height: 40px;
+  }
+  
+  .logo-text {
     font-size: 1.3rem;
   }
 }

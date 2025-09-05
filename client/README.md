@@ -1,6 +1,6 @@
 # Admuse Easy
 
-Admuse Easy is a web app that empowers anyone—no coding required—to create emotionally resonant ads using mascot personalities and mood-driven design. Just enter your product info, pick a mascot, and Admuse Easy generates ad layouts and copy for billboards, Instagram, or landing pages.
+A simple web application that helps users create personality-based advertising concepts using mascot characters (Capybara, Hamster, Parrot). Each mascot has a distinct copywriting style to create headlines, taglines, and calls-to-action that align with the brand's mood.
 
 ## Features
 - Simple UI for product info, mascot/mood selection, and ad generation
@@ -34,10 +34,10 @@ AI powers the mascot logic and is designed to generate creative, brand-consisten
 
 ## Demo
 - [Demo Video Link Here]
-- [Live Site Link Here (if deployed)]
+- admuse-easy.azurewebsites.net
 
-## What surprised us?
-How quickly non-tech users can create fun, professional ads with just a few clicks—and how much personality mascots add to the creative process!
+## The Main Idea
+A tool that helps users create engaging and professional ad copy within minutes. The project enables individuals or small teams to generate their own copywriting content, while also adding creativity through the use of mascots.
 
 ---
 
