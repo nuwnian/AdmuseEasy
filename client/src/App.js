@@ -32,11 +32,15 @@ function App() {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/generate-copy', {
+      const response = await fetch('http://localhost:5000/api/generate-copy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product, mascot })
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       const data = await response.json();
       

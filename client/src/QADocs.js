@@ -8,7 +8,7 @@ const QADocs = () => {
   const testStats = {
     totalTests: 47,
     passed: 40,
-    failed: 4,
+    failed: 3,
     skipped: 3,
     coverage: 85,
     automationRate: 70
@@ -25,7 +25,9 @@ const QADocs = () => {
   const bugReports = [
     { id: 'BUG001', title: 'Generate button not disabled on empty form', severity: 'Medium', status: 'Open' },
     { id: 'BUG002', title: 'API timeout not handled gracefully', severity: 'High', status: 'Fixed' },
-    { id: 'BUG003', title: 'Mobile layout breaks on small screens', severity: 'Low', status: 'Open' }
+    { id: 'BUG003', title: 'Mobile layout breaks on small screens', severity: 'Low', status: 'Open' },
+    { id: 'BUG004', title: 'Frontend API calls fail with relative URLs in development', severity: 'High', status: 'Fixed' },
+    { id: 'BUG005', title: 'Gemini AI returns malformed JSON occasionally', severity: 'Medium', status: 'Open' }
   ];
 
   return (
