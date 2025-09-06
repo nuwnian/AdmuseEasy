@@ -1,6 +1,9 @@
 
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
+import QADocs from './QADocs';
+import About from './About';
 
 const mascots = [
   { key: 'capybara', name: 'Cozy Capybara', mood: 'Calming', description: 'Minimalist layouts with soft copy', emoji: '🧸' },
@@ -15,6 +18,7 @@ const formats = [
 ];
 
 function App() {
+  const AdGenerator = () => {
   const [product, setProduct] = useState({ name: '', description: '', audience: '' });
   const [mascot, setMascot] = useState(mascots[0].key);
   const [format, setFormat] = useState(formats[0].key);
@@ -49,8 +53,8 @@ function App() {
     }
   };
 
-  return (
-    <div className="app">
+    return (
+      <div className="app">
       {/* Navbar */}
       <nav className="navbar">
         <div className="nav-container">
@@ -59,9 +63,9 @@ function App() {
             <span className="logo-text">AdmuseEasy</span>
           </div>
           <div className="nav-links">
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            <Link to="/">Ad Generator</Link>
+            <Link to="/about">About</Link>
+            <Link to="/qa-docs">QA Documentation</Link>
           </div>
         </div>
       </nav>
@@ -133,7 +137,18 @@ function App() {
       <footer className="footer">
         <p>© 2025 AdmuseEasy • Made with 💙 for creative marketers</p>
       </footer>
-    </div>
+      </div>
+    );
+  };
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<AdGenerator />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/qa-docs" element={<QADocs />} />
+      </Routes>
+    </Router>
   );
 }
 
