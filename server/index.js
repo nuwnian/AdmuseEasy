@@ -37,6 +37,11 @@ const mascotPrompts = {
     personality: "quirky, creative, playful, unique",
     tone: "fun, witty, clever",
     style: "creative wordplay and unexpected phrases"
+  },
+  panda: {
+    personality: "focused, balanced, wise, centered",
+    tone: "calm, clear, purposeful",
+    style: "balanced language with emphasis on clarity and focus"
   }
 };
 
@@ -100,6 +105,12 @@ function getFallbackCopy(product, mascot) {
       headline: `${productName} - Uniquely You!`,
       tagline: `Creative solutions for creative minds`,
       cta: `Stand Out!`,
+      blurb: description
+    },
+    panda: {
+      headline: `${productName} - Balanced Excellence`,
+      tagline: `Clear focus, lasting results`,
+      cta: `Find Balance`,
       blurb: description
     }
   };
