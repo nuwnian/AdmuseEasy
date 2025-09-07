@@ -113,14 +113,7 @@ function App() {
               ))}
             </div>
           </div>
-          <div className="input-group">
-            <label>Output Format</label>
-            <select value={format} onChange={e => setFormat(e.target.value)}>
-              {formats.map(f => (
-                <option key={f.key} value={f.key}>{f.label}</option>
-              ))}
-            </select>
-          </div>
+
           <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
             {loading ? (
               <div className="loading-spinner">
@@ -134,7 +127,7 @@ function App() {
         </div>
         {adResult && (
           <div className="result-section">
-            <h2>Generated Ad ({adResult.format})</h2>
+            <h2>Generated Ad</h2>
             <div className="ad-layout" dangerouslySetInnerHTML={{ __html: adResult.layout }} />
             <div className="ad-copy">
               <h3>Copywriting</h3>
