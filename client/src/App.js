@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import './App.css';
 
+// AdmuseEasy - Personality-Driven Marketing Ad Generator
+// Built with React.js for modern, responsive user experience
+
+// Mascot personalities - each with unique messaging style and approach
 const mascots = [
   { key: 'capybara', name: 'Cozy Capybara', mood: 'Calming', description: 'Minimalist layouts with soft copy', emoji: '/mascots/Capybara-icon.png' },
   { key: 'hamster', name: 'Hype Hamster', mood: 'Energetic', description: 'Punchy headlines and bold visuals', emoji: '/mascots/Hamster-icon.png' },
@@ -45,7 +49,13 @@ function App() {
       const data = await response.json();
       
       setAdResult({
-        layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>\\n  <h1>${product.name || 'Product Name'}</h1>\\n  <h2><img src="${mascots.find(m => m.key === mascot).emoji}" alt="${mascots.find(m => m.key === mascot).name}" style="width:40px;height:40px;vertical-align:middle;margin-right:10px;" />${mascots.find(m => m.key === mascot).name}</h2>\\n  <p>${product.description || 'Product description goes here.'}</p>\\n  <p><em>For: ${product.audience || 'Target Audience'}</em></p>\\n  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>${data.copy.cta}</button>\\n</div>`,
+        layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>
+  <h1>${product.name || 'Product Name'}</h1>
+  <h2><img src="${mascots.find(m => m.key === mascot).emoji}" alt="${mascots.find(m => m.key === mascot).name}" style="width:40px;height:40px;vertical-align:middle;margin-right:10px;" />${mascots.find(m => m.key === mascot).name}</h2>
+  <p>${product.description || 'Product description goes here.'}</p>
+  <p><em>For: ${product.audience || 'Target Audience'}</em></p>
+  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;background:#4f8cff;color:white;border:none;border-radius:0.5em;cursor:pointer;'>${data.copy.cta}</button>
+</div>`,
         copy: data.copy,
         format: formats.find(f => f.key === format).label
       });

@@ -8,6 +8,7 @@ A complete web application that generates marketing ads using unique mascot pers
 - **Cozy Capybara** - Calm, minimalist approach
 - **Hype Hamster** - Energetic, bold messaging  
 - **Pixel Parrot** - Quirky, creative copy
+- **Zen Panda** - Focused, balanced messaging
 
 ## ✨ Features
 
