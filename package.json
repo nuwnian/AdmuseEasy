@@ -4,9 +4,8 @@
   "description": "Simple mascot ad generator",
   "main": "server/index.js",
   "scripts": {
-    "start": "cd server && npm install && npm start",
     "build": "cd client && npm install && npm run build",
-    "postbuild": "cp -r client/build/* server/public/ || xcopy client\\build\\* server\\public\\ /E /I /Y"
+    "start": "npm run build && cd server && npm install && npm start"
   },
   "dependencies": {
     "express": "^4.19.2"

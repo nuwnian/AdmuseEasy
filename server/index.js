@@ -17,7 +17,7 @@ app.use(helmet());
 // Security: Restrict CORS to specific origins
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://admuse-easy.azurewebsites.net', 'https://your-frontend-domain.azurewebsites.net'] 
+    ? true // Allow all origins in production for Railway
     : ['http://localhost:3000']
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -150,7 +150,7 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
 });
 
 // Serve React build files
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -159,7 +159,9 @@ app.get('/api/health', (req, res) => {
 
 // Fallback: serve React index.html for any unknown route (SPA support)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build/index.html'));
+  const indexPath = path.join(__dirname, '../client/build/index.html');
+  console.log('Serving index.html from:', indexPath);
+  res.sendFile(indexPath);
 });
 
 app.listen(PORT, () => {
