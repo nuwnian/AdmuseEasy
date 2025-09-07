@@ -12,16 +12,12 @@ const mascots = [
   { key: 'panda', name: 'Zen Panda', mood: 'Focused', description: 'Calm, balanced messaging with clarity', emoji: '/mascots/Panda-icon.png' },
 ];
 
-const formats = [
-  { key: 'billboard', label: 'Billboard' },
-  { key: 'instagram', label: 'Instagram Reel' },
-  { key: 'landing', label: 'Landing Page' },
-];
+
 
 function App() {
   const [product, setProduct] = useState({ name: '', description: '', audience: '' });
   const [mascot, setMascot] = useState(mascots[0].key);
-  const [format, setFormat] = useState(formats[0].key);
+
   const [adResult, setAdResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -56,8 +52,7 @@ function App() {
   <p><em>For: ${product.audience || 'Target Audience'}</em></p>
   <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;background:#4f8cff;color:white;border:none;border-radius:0.5em;cursor:pointer;'>${data.copy.cta}</button>
 </div>`,
-        copy: data.copy,
-        format: formats.find(f => f.key === format).label
+        copy: data.copy
       });
     } catch (error) {
       console.error('Failed to generate ad:', error);
