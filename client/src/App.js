@@ -81,8 +81,9 @@ function App() {
       
       const data = await response.json();
       
+      const mascotObj = mascots.find(m => m.key === mascot);
       setAdResult({
-        layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>\n  <h1>${product.name || 'Product Name'}</h1>\n  <h2>${mascots.find(m => m.key === mascot).emoji} ${mascots.find(m => m.key === mascot).name}</h2>\n  <p>${product.description || 'Product description goes here.'}</p>\n  <p><em>For: ${product.audience || 'Target Audience'}</em></p>\n  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>${data.copy.cta}</button>\n</div>`,
+        layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>\n  <h1>${product.name || 'Product Name'}</h1>\n  <h2><img src='${mascotObj.icon}' alt='${mascotObj.name}' style='width:40px;height:40px;vertical-align:middle;margin-right:8px;border-radius:8px;'/> ${mascotObj.name}</h2>\n  <p>${product.description || 'Product description goes here.'}</p>\n  <p><em>For: ${product.audience || 'Target Audience'}</em></p>\n  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>${data.copy.cta}</button>\n</div>`,
         copy: data.copy
       });
     } catch (error) {
