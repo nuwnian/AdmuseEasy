@@ -66,10 +66,13 @@ function App() {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/generate-copy', {
+      const apiBase = process.env.NODE_ENV === 'production'
+        ? '' // use relative path in production
+        : 'http://localhost:5000';
+      const response = await fetch(`${apiBase}/api/generate-copy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ product, mascot })
+        body: JSON.stringify({ product, mascot })
       });
       
       if (!response.ok) {
