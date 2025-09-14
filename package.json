@@ -1,10 +1,11 @@
 {
   "name": "admuse-easy",
   "version": "1.0.0",
-  "description": "Simple mascot ad generator",
-  "main": "app.js",
+  "description": "AI-powered marketing platform with business features",
+  "main": "server/index.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "cd server && npm install && npm start",
+    "build": "cd server && npm install"
   },
   "dependencies": {
     "express": "^4.19.2"
