@@ -2,11 +2,32 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
+const mongoose = require('mongoose');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
 
+// Import routes
+const authRoutes = require('./routes/auth');
+const projectRoutes = require('./routes/projects');
+const dashboardRoutes = require('./routes/dashboard');
+const User = require('./models/User');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Database connection
+const connectDB = async () => {
+  try {
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/admuse-easy';
+    await mongoose.connect(mongoURI);
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    // Continue without database for now
+  }
+};
+
+connectDB();
 
 // Initialize Google Gemini
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
@@ -17,10 +38,15 @@ app.use(helmet());
 // Security: Restrict CORS to specific origins
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://admuse-easy.azurewebsites.net', 'https://your-frontend-domain.azurewebsites.net'] 
+    ? ['https://admuse-easy.azurewebsites.net', 'https://admuseeasy-production.up.railway.app'] 
     : ['http://localhost:3000']
 }));
 app.use(express.json({ limit: '10mb' }));
+
+// Business feature routes
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 // Mascot personality prompts for AI
 const mascotPrompts = {
   capybara: {
@@ -126,11 +152,24 @@ const validateInput = (req, res, next) => {
   next();
 };
 
-// API: Generate ad copy with AI
+// API: Generate ad copy with AI (updated with user tracking)
 app.post('/api/generate-copy', validateInput, async (req, res) => {
   try {
     const { product, mascot } = req.body;
     const copy = await generateAICopy(product, mascot);
+    
+    // Track usage if user is authenticated
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (token) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+        await User.findByIdAndUpdate(decoded.userId, { $inc: { usageCount: 1 } });
+      } catch (err) {
+        // Continue without tracking if token is invalid
+      }
+    }
+    
     res.json({ copy, powered_by: 'AI' });
   } catch (error) {
     console.error('Copy generation error:', error);
@@ -138,17 +177,17 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
   }
 });
 
-// Serve React build files
-app.use(express.static(path.join(__dirname, 'client/build')));
+// Serve static files from server/public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ message: 'AdmuseEasy API is running!' });
 });
 
-// Fallback: serve React index.html for any unknown route (SPA support)
+// Fallback: serve index.html for any unknown route (SPA support)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build/index.html'));
+  res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 app.listen(PORT, () => {
