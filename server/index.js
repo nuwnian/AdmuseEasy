@@ -63,6 +63,11 @@ const mascotPrompts = {
     personality: "quirky, creative, playful, unique",
     tone: "fun, witty, clever",
     style: "creative wordplay and unexpected phrases"
+  },
+  panda: {
+    personality: "zen, focused, balanced, mindful",
+    tone: "centered, calm, thoughtful",
+    style: "clear, balanced language with a focus on mindfulness and clarity"
   }
 };
 
@@ -127,6 +132,12 @@ function getFallbackCopy(product, mascot) {
       tagline: `Creative solutions for creative minds`,
       cta: `Stand Out!`,
       blurb: description
+    },
+    panda: {
+      headline: `${productName} - Find Your Focus`,
+      tagline: `Balanced solutions for mindful work`,
+      cta: `Stay Zen`,
+      blurb: description
     }
   };
   return fallbackCopy[mascot];
@@ -135,20 +146,19 @@ function getFallbackCopy(product, mascot) {
 // Input validation middleware
 const validateInput = (req, res, next) => {
   const { product, mascot } = req.body;
-  
+  console.log('DEBUG validateInput:', { product, mascot });
   if (!product || typeof product !== 'object') {
+    console.log('DEBUG validateInput error: Invalid product data', req.body);
     return res.status(400).json({ error: 'Invalid product data' });
   }
-  
   if (!mascot || typeof mascot !== 'string' || !mascotPrompts[mascot]) {
+    console.log('DEBUG validateInput error: Invalid mascot selection', mascot);
     return res.status(400).json({ error: 'Invalid mascot selection' });
   }
-  
   // Sanitize string inputs
   if (product.name) product.name = product.name.toString().slice(0, 100);
   if (product.description) product.description = product.description.toString().slice(0, 500);
   if (product.audience) product.audience = product.audience.toString().slice(0, 100);
-  
   next();
 };
 
