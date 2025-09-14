@@ -1,27 +1,61 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
+
 import QADocs from './QADocs';
 import About from './About';
 
+
+function DemoNotice() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button className="demo-fab" onClick={() => setOpen(true)} title="Show demo info">🚧</button>
+      {open && (
+        <div className="demo-notice">
+          <span className="demo-notice-close" onClick={() => setOpen(false)} title="Close">×</span>
+          <span role="img" aria-label="demo">🚧</span> This site is for demo/portfolio purposes only. No real products or services are being sold. <span role="img" aria-label="demo">🚧</span>
+        </div>
+      )}
+    </>
+  );
+}
+
 const mascots = [
-  { key: 'capybara', name: 'Cozy Capybara', mood: 'Calming', description: 'Minimalist layouts with soft copy', emoji: '🧸' },
-  { key: 'hamster', name: 'Hype Hamster', mood: 'Energetic', description: 'Punchy headlines and bold visuals', emoji: '🐹' },
-  { key: 'parrot', name: 'Pixel Parrot', mood: 'Quirky', description: 'Clever copy and layout tweaks', emoji: '🦜' },
+  { key: 'capybara', name: 'Cozy Capybara', mood: 'Calming', description: 'Minimalist layouts with soft copy', icon: '/mascots/Capybara-icon.png' },
+  { key: 'hamster', name: 'Hype Hamster', mood: 'Energetic', description: 'Punchy headlines and bold visuals', icon: '/mascots/Hamster-icon.png' },
+  { key: 'parrot', name: 'Pixel Parrot', mood: 'Quirky', description: 'Clever copy and layout tweaks', icon: '/mascots/Parrot-icon.png' },
+  { key: 'panda', name: 'Zen Panda', mood: 'Focused', description: 'Balanced, mindful, and focused tone', icon: '/mascots/Panda-icon.png' },
 ];
 
-const formats = [
-  { key: 'billboard', label: 'Billboard' },
-  { key: 'instagram', label: 'Instagram Reel' },
-  { key: 'landing', label: 'Landing Page' },
-];
+
 
 function App() {
   const AdGenerator = () => {
+  const [showNavbar, setShowNavbar] = useState(true);
+  const lastScrollY = useRef(window.scrollY);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY < 40) {
+        setShowNavbar(true);
+        lastScrollY.current = window.scrollY;
+        return;
+      }
+      if (window.scrollY > lastScrollY.current) {
+        setShowNavbar(false); // scrolling down
+      } else {
+        setShowNavbar(true); // scrolling up
+      }
+      lastScrollY.current = window.scrollY;
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   const [product, setProduct] = useState({ name: '', description: '', audience: '' });
   const [mascot, setMascot] = useState(mascots[0].key);
-  const [format, setFormat] = useState(formats[0].key);
+  // Removed format state
   const [adResult, setAdResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +69,7 @@ function App() {
       const response = await fetch('http://localhost:5000/api/generate-copy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product, mascot })
+  body: JSON.stringify({ product, mascot })
       });
       
       if (!response.ok) {
@@ -46,8 +80,7 @@ function App() {
       
       setAdResult({
         layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>\n  <h1>${product.name || 'Product Name'}</h1>\n  <h2>${mascots.find(m => m.key === mascot).emoji} ${mascots.find(m => m.key === mascot).name}</h2>\n  <p>${product.description || 'Product description goes here.'}</p>\n  <p><em>For: ${product.audience || 'Target Audience'}</em></p>\n  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>${data.copy.cta}</button>\n</div>`,
-        copy: data.copy,
-        format: formats.find(f => f.key === format).label
+        copy: data.copy
       });
     } catch (error) {
       console.error('Failed to generate ad:', error);
@@ -60,7 +93,7 @@ function App() {
     return (
       <div className="app">
       {/* Navbar */}
-      <nav className="navbar">
+  <nav className={`navbar${showNavbar ? '' : ' navbar--hidden'}`}>
         <div className="nav-container">
           <div className="nav-logo">
             <img src="/Admuse-Logo.png" alt="AdmuseEasy" className="logo-image" />
@@ -94,7 +127,7 @@ function App() {
             {mascots.map(m => (
               <label key={m.key} className={mascot === m.key ? 'selected' : ''}>
                 <input type="radio" name="mascot" value={m.key} checked={mascot === m.key} onChange={() => setMascot(m.key)} />
-                <span className="emoji">{m.emoji}</span>
+                <img src={m.icon} alt={m.name} className="mascot-icon" style={{ width: 40, height: 40, marginRight: 8, verticalAlign: 'middle' }} />
                 <div className="mascot-info">
                   <div><b>{m.name}</b> <span className="mood">({m.mood})</span></div>
                   <div className="desc">{m.description}</div>
@@ -103,14 +136,7 @@ function App() {
             ))}
           </div>
         </div>
-        <div className="input-group">
-          <label>Output Format</label>
-          <select value={format} onChange={e => setFormat(e.target.value)}>
-            {formats.map(f => (
-              <option key={f.key} value={f.key}>{f.label}</option>
-            ))}
-          </select>
-        </div>
+
         <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
           {loading ? (
             <div className="loading-spinner">
@@ -124,7 +150,7 @@ function App() {
       </div>
       {adResult && (
         <div className="result-section">
-          <h2>Generated Ad ({adResult.format})</h2>
+          <h2>Generated Ad</h2>
           <div className="ad-layout" dangerouslySetInnerHTML={{ __html: adResult.layout }} />
           <div className="ad-copy">
             <h3>Copywriting</h3>
@@ -147,6 +173,7 @@ function App() {
 
   return (
     <Router>
+      <DemoNotice />
       <Routes>
         <Route path="/" element={<AdGenerator />} />
         <Route path="/about" element={<About />} />

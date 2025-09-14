@@ -46,24 +46,31 @@ const About = () => {
 
         <section className="about-section">
           <h2>Meet the Mascots</h2>
+          <p>AdmuseEasy now features four mascot personalities, each with a unique mood and a custom icon for a more engaging experience.</p>
           <div className="mascots-showcase">
             <div className="mascot-showcase">
-              <div className="mascot-icon">🧸</div>
+              <img className="mascot-icon" src="/mascots/Capybara-icon.png" alt="Cozy Capybara" width="64" height="64" />
               <h3>Cozy Capybara</h3>
               <p><strong>Mood:</strong> Calming</p>
               <p>Creates minimalist layouts with soft, gentle copy that emphasizes comfort and relaxation. Perfect for wellness, lifestyle, and premium products.</p>
             </div>
             <div className="mascot-showcase">
-              <div className="mascot-icon">🐹</div>
+              <img className="mascot-icon" src="/mascots/Hamster-icon.png" alt="Hype Hamster" width="64" height="64" />
               <h3>Hype Hamster</h3>
               <p><strong>Mood:</strong> Energetic</p>
               <p>Generates punchy headlines and bold visuals with high-energy language. Ideal for fitness, technology, and youth-oriented products.</p>
             </div>
             <div className="mascot-showcase">
-              <div className="mascot-icon">🦜</div>
+              <img className="mascot-icon" src="/mascots/Parrot-icon.png" alt="Pixel Parrot" width="64" height="64" />
               <h3>Pixel Parrot</h3>
               <p><strong>Mood:</strong> Quirky</p>
               <p>Produces clever copy with creative layout tweaks and playful messaging. Great for creative services, entertainment, and unique brands.</p>
+            </div>
+            <div className="mascot-showcase">
+              <img className="mascot-icon" src="/mascots/Panda-icon.png" alt="Zen Panda" width="64" height="64" />
+              <h3>Zen Panda</h3>
+              <p><strong>Mood:</strong> Focused</p>
+              <p>Delivers balanced, mindful, and focused ad copy with a calm and centered tone. Perfect for productivity, mindfulness, and educational brands.</p>
             </div>
           </div>
         </section>
