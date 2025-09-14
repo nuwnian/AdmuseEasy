@@ -4,8 +4,8 @@
   "description": "AI-powered marketing platform with business features",
   "main": "server/index.js",
   "scripts": {
-    "start": "cd server && npm install && npm start",
-    "build": "cd server && npm install"
+    "build": "cd client && npm install && npm run build && cd ../server && npm install",
+    "start": "npm run build && cd server && npm start"
   },
   "dependencies": {
     "express": "^4.19.2"

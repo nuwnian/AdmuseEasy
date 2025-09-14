@@ -177,17 +177,17 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
   }
 });
 
-// Serve static files from server/public directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve React build files
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ message: 'AdmuseEasy API is running!' });
 });
 
-// Fallback: serve index.html for any unknown route (SPA support)
+// Fallback: serve React index.html for any unknown route (SPA support)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
 app.listen(PORT, () => {
