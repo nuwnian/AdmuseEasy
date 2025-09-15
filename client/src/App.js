@@ -5,6 +5,10 @@ import './App.css';
 
 import QADocs from './QADocs';
 import About from './About';
+import Login from './Login';
+import Signup from './Signup';
+import AuthSuccess from './AuthSuccess';
+import AuthError from './AuthError';
 
 
 function DemoNotice() {
@@ -32,6 +36,26 @@ const mascots = [
 
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Check if user is logged in on app load
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      // You could decode the JWT here to get user info
+      setUser({ email: 'user@example.com' }); // Placeholder
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setUser(null);
+    window.location.href = '/';
+  };
+
   const AdGenerator = () => {
   const [showNavbar, setShowNavbar] = useState(true);
   const lastScrollY = useRef(window.scrollY);
@@ -107,6 +131,17 @@ function App() {
             <Link to="/">Ad Generator</Link>
             <Link to="/about">About</Link>
             <Link to="/qa-docs">QA Documentation</Link>
+            {isLoggedIn ? (
+              <div className="auth-links">
+                <span className="user-info">👤 {user?.email}</span>
+                <button onClick={handleLogout} className="logout-btn">Logout</button>
+              </div>
+            ) : (
+              <div className="auth-links">
+                <Link to="/login">Login</Link>
+                <Link to="/signup">Sign Up</Link>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -182,6 +217,10 @@ function App() {
         <Route path="/" element={<AdGenerator />} />
         <Route path="/about" element={<About />} />
         <Route path="/qa-docs" element={<QADocs />} />
+        <Route path="/login" element={<Login onLogin={setIsLoggedIn} />} />
+        <Route path="/signup" element={<Signup onSignup={setIsLoggedIn} />} />
+        <Route path="/auth/success" element={<AuthSuccess />} />
+        <Route path="/auth/error" element={<AuthError />} />
       </Routes>
     </Router>
   );

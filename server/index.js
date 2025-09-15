@@ -3,8 +3,12 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
+const session = require('express-session');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 require('dotenv').config();
+
+// Import passport after dotenv is configured
+const passport = require('./config/passport');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -34,6 +38,18 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 // Security headers
 app.use(helmet());
+
+// Session configuration for OAuth
+app.use(session({
+  secret: process.env.JWT_SECRET || 'fallback-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // Set to true in production with HTTPS
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Security: Restrict CORS to specific origins
 app.use(cors({
@@ -187,8 +203,8 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
   }
 });
 
-// Serve React build files
-app.use(express.static(path.join(__dirname, '../client/build')));
+// Serve React build files (disabled for development)
+// app.use(express.static(path.join(__dirname, '../client/build')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -196,9 +212,10 @@ app.get('/api/health', (req, res) => {
 });
 
 // Fallback: serve React index.html for any unknown route (SPA support)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
-});
+// (disabled for development - frontend runs on separate port)
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../client/build/index.html'));
+// });
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

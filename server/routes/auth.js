@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+const passport = require('passport');
 const User = require('../models/User');
 
 const router = express.Router();
@@ -101,5 +102,30 @@ router.post('/login', [
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Google OAuth routes
+router.get('/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+router.get('/google/callback',
+  passport.authenticate('google', { session: false }),
+  async (req, res) => {
+    try {
+      // Generate JWT token
+      const token = jwt.sign(
+        { userId: req.user._id },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '7d' }
+      );
+
+      // Redirect to frontend with token
+      res.redirect(`http://localhost:3000/auth/success?token=${token}`);
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      res.redirect('http://localhost:3000/auth/error');
+    }
+  }
+);
 
 module.exports = router;
