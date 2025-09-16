@@ -1,0 +1,17 @@
+# Ignore files for Docker builds
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+README.md
+.vscode
+.github
+*.md
+client/node_modules
+client/build
+server/node_modules
+.DS_Store
+*.log
+coverage
+.nyc_output

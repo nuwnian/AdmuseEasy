@@ -237,7 +237,11 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ message: 'AdmuseEasy API is running!' });
+  res.json({ 
+    message: 'AdmuseEasy API is running!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // Sentry error handler must be before any other error middleware and after all controllers

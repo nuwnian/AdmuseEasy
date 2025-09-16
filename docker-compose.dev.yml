@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Development version with live code reloading
+  admuse-app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/admuse?authSource=admin
+      - JWT_SECRET=development-secret-key
+      - CHOKIDAR_USEPOLLING=true  # For file watching in Docker
+    volumes:
+      # Mount your code for live changes (no rebuild needed!)
+      - ./server:/app/server
+      # Use named volume for node_modules to avoid permission issues
+      - node_modules:/app/server/node_modules
+    depends_on:
+      - mongodb
+    working_dir: /app/server
+    user: root  # Run as root for development to avoid permission issues
+    command: ["sh", "-c", "npm install && npm install nodemon --no-save && npm run dev"]
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+    volumes:
+      - mongodb-data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongodb-data:
+  node_modules:

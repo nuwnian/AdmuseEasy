@@ -50,7 +50,7 @@ const initSentry = () => {
 
 // Middleware to capture Express.js errors
 const sentryErrorHandler = () => {
-  if (!sentryInitialized || !Sentry.Handlers) {
+  if (!sentryInitialized || !Sentry.Handlers || !Sentry.Handlers.errorHandler) {
     // Return a no-op middleware if Sentry isn't configured
     return (error, req, res, next) => {
       console.error('Error (Sentry not configured):', error.message);
@@ -76,7 +76,7 @@ const sentryErrorHandler = () => {
 
 // Request handler middleware
 const sentryRequestHandler = () => {
-  if (!sentryInitialized || !Sentry.Handlers) {
+  if (!sentryInitialized || !Sentry.Handlers || !Sentry.Handlers.requestHandler) {
     console.log('Sentry not initialized or handlers not available, using no-op middleware');
     return (req, res, next) => next();
   }
@@ -91,7 +91,7 @@ const sentryRequestHandler = () => {
 
 // Tracing middleware
 const sentryTracingHandler = () => {
-  if (!sentryInitialized || !Sentry.Handlers) {
+  if (!sentryInitialized || !Sentry.Handlers || !Sentry.Handlers.tracingHandler) {
     console.log('Sentry not initialized or handlers not available, using no-op middleware');
     return (req, res, next) => next();
   }
