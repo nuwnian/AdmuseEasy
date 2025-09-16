@@ -2,12 +2,24 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const passport = require('passport');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 const router = express.Router();
 
+// Middleware to check database connection
+const checkDbConnection = (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ 
+      error: 'Database connection unavailable. Please try again later.',
+      details: 'MongoDB connection state: ' + mongoose.connection.readyState
+    });
+  }
+  next();
+};
+
 // Register
-router.post('/register', [
+router.post('/register', checkDbConnection, [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
   body('name').trim().isLength({ min: 2 })
@@ -53,7 +65,7 @@ router.post('/register', [
 });
 
 // Login
-router.post('/login', [
+router.post('/login', checkDbConnection, [
   body('email').isEmail().normalizeEmail(),
   body('password').exists()
 ], async (req, res) => {

@@ -5,7 +5,13 @@ const helmet = require('helmet');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-require('dotenv').config();
+
+// Load environment variables from the correct path
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// Initialize Sentry first
+const { initSentry, sentryRequestHandler, sentryTracingHandler, sentryErrorHandler } = require('./config/sentry');
+initSentry();
 
 // Import passport after dotenv is configured
 const passport = require('./config/passport');
@@ -14,6 +20,7 @@ const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const projectRoutes = require('./routes/projects');
 const dashboardRoutes = require('./routes/dashboard');
+const testRoutes = require('./routes/test');
 const User = require('./models/User');
 
 const app = express();
@@ -22,12 +29,29 @@ const PORT = process.env.PORT || 5000;
 // Database connection
 const connectDB = async () => {
   try {
+    // Make sure we load environment variables from the correct path
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/admuse-easy';
-    await mongoose.connect(mongoURI);
+    
+    console.log('Attempting to connect to MongoDB...');
+    console.log('MongoDB URI configured:', mongoURI ? 'Yes' : 'No');
+    
+    await mongoose.connect(mongoURI, {
+      // Connection options to handle timeouts and retries
+      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      minPoolSize: 5, // Maintain a minimum of 5 socket connections
+      retryWrites: true,
+      w: 'majority'
+    });
+    
     console.log('MongoDB connected successfully');
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    // Continue without database for now
+    console.error('MongoDB connection error:', error.message);
+    console.error('Full error:', error);
+    
+    // Don't exit the process, continue without database for now
+    console.log('Continuing without database connection...');
   }
 };
 
@@ -38,6 +62,10 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 // Security headers
 app.use(helmet());
+
+// Sentry request tracking middleware (must be first)
+app.use(sentryRequestHandler());
+app.use(sentryTracingHandler());
 
 // Session configuration for OAuth
 app.use(session({
@@ -63,6 +91,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api', testRoutes);
 // Mascot personality prompts for AI
 const mascotPrompts = {
   capybara: {
@@ -210,6 +239,9 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ message: 'AdmuseEasy API is running!' });
 });
+
+// Sentry error handler must be before any other error middleware and after all controllers
+app.use(sentryErrorHandler());
 
 // Fallback: serve React index.html for any unknown route (SPA support)
 // (disabled for development - frontend runs on separate port)

@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import './App.css';
+import * as Sentry from "@sentry/react";
+import { trackPageView, trackConversion, trackUserAction, setUserProperties } from './utils/analytics';
 
 import QADocs from './QADocs';
 import About from './About';
@@ -26,6 +28,39 @@ function DemoNotice() {
   );
 }
 
+// Error fallback component for Sentry
+function ErrorFallback({ error, resetError }) {
+  return (
+    <div style={{ padding: '20px', textAlign: 'center', background: '#f8f9fa', minHeight: '100vh' }}>
+      <h2>Oops! Something went wrong 😅</h2>
+      <p>We've been notified about this error and will fix it soon.</p>
+      <details style={{ marginTop: '10px', textAlign: 'left', maxWidth: '500px', margin: '20px auto' }}>
+        <summary>Error details</summary>
+        <pre style={{ background: '#f1f1f1', padding: '10px', borderRadius: '4px', fontSize: '12px' }}>
+          {error.message}
+        </pre>
+      </details>
+      <button 
+        onClick={resetError}
+        style={{ 
+          background: '#007bff', 
+          color: 'white', 
+          border: 'none', 
+          padding: '10px 20px', 
+          borderRadius: '4px',
+          cursor: 'pointer',
+          marginTop: '10px'
+        }}
+      >
+        Try again
+      </button>
+      <div style={{ marginTop: '20px' }}>
+        <a href="/" style={{ color: '#007bff' }}>← Back to home</a>
+      </div>
+    </div>
+  );
+}
+
 const mascots = [
   { key: 'capybara', name: 'Cozy Capybara', mood: 'Calming', description: 'Minimalist layouts with soft copy', icon: '/mascots/Capybara-icon.png' },
   { key: 'hamster', name: 'Hype Hamster', mood: 'Energetic', description: 'Punchy headlines and bold visuals', icon: '/mascots/Hamster-icon.png' },
@@ -46,15 +81,30 @@ function App() {
       setIsLoggedIn(true);
       // You could decode the JWT here to get user info
       setUser({ email: 'user@example.com' }); // Placeholder
+      
+      // Set user properties for analytics
+      setUserProperties('user_id', { email: 'user@example.com' });
     }
   }, []);
 
   const handleLogout = () => {
+    trackUserAction('logout', 'navbar');
     localStorage.removeItem('token');
     setIsLoggedIn(false);
     setUser(null);
     window.location.href = '/';
   };
+
+  // Component to track page views
+  function PageTracker() {
+    const location = useLocation();
+    
+    useEffect(() => {
+      trackPageView(location.pathname);
+    }, [location]);
+    
+    return null;
+  }
 
   const AdGenerator = () => {
   const [showNavbar, setShowNavbar] = useState(true);
@@ -89,6 +139,10 @@ function App() {
 
   const handleGenerate = async () => {
     setLoading(true);
+    
+    // Track the ad generation attempt
+    trackUserAction('generate_ad_attempt', 'generate_button');
+    
     try {
       const apiBase = process.env.NODE_ENV === 'production'
         ? '' // use relative path in production
@@ -110,8 +164,24 @@ function App() {
         layout: `<div style='padding:2em;background:#f4f4f4;border-radius:1em;text-align:center;'>\n  <h1>${product.name || 'Product Name'}</h1>\n  <h2><img src='${mascotObj.icon}' alt='${mascotObj.name}' style='width:40px;height:40px;vertical-align:middle;margin-right:8px;border-radius:8px;'/> ${mascotObj.name}</h2>\n  <p>${product.description || 'Product description goes here.'}</p>\n  <p><em>For: ${product.audience || 'Target Audience'}</em></p>\n  <button style='margin-top:1em;padding:0.5em 2em;font-size:1.2em;'>${data.copy.cta}</button>\n</div>`,
         copy: data.copy
       });
+      
+      // Track successful ad generation
+      trackConversion(mascot, product.name || 'unnamed_product');
+      
     } catch (error) {
       console.error('Failed to generate ad:', error);
+      
+      // Send error to Sentry with context
+      Sentry.withScope((scope) => {
+        scope.setTag("component", "AdGenerator");
+        scope.setContext("product", product);
+        scope.setContext("mascot", mascot);
+        Sentry.captureException(error);
+      });
+      
+      // Track failed generation
+      trackUserAction('generate_ad_error', 'api_error');
+      
       alert('Failed to generate ad. Please try again.');
     } finally {
       setLoading(false);
@@ -128,9 +198,9 @@ function App() {
             <span className="logo-text">AdmuseEasy</span>
           </div>
           <div className="nav-links">
-            <Link to="/">Ad Generator</Link>
-            <Link to="/about">About</Link>
-            <Link to="/qa-docs">QA Documentation</Link>
+            <Link to="/" onClick={() => trackUserAction('nav_click', 'home')}>Ad Generator</Link>
+            <Link to="/about" onClick={() => trackUserAction('nav_click', 'about')}>About</Link>
+            <Link to="/qa-docs" onClick={() => trackUserAction('nav_click', 'qa_docs')}>QA Documentation</Link>
             {isLoggedIn ? (
               <div className="auth-links">
                 <span className="user-info">👤 {user?.email}</span>
@@ -138,8 +208,8 @@ function App() {
               </div>
             ) : (
               <div className="auth-links">
-                <Link to="/login">Login</Link>
-                <Link to="/signup">Sign Up</Link>
+                <Link to="/login" onClick={() => trackUserAction('nav_click', 'login')}>Login</Link>
+                <Link to="/signup" onClick={() => trackUserAction('nav_click', 'signup')}>Sign Up</Link>
               </div>
             )}
           </div>
@@ -211,18 +281,23 @@ function App() {
   };
 
   return (
-    <Router>
-      <DemoNotice />
-      <Routes>
-        <Route path="/" element={<AdGenerator />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/qa-docs" element={<QADocs />} />
-        <Route path="/login" element={<Login onLogin={setIsLoggedIn} />} />
-        <Route path="/signup" element={<Signup onSignup={setIsLoggedIn} />} />
-        <Route path="/auth/success" element={<AuthSuccess />} />
-        <Route path="/auth/error" element={<AuthError />} />
-      </Routes>
-    </Router>
+    <Sentry.ErrorBoundary fallback={ErrorFallback} beforeCapture={(scope) => {
+      scope.setTag("location", "App");
+    }}>
+      <Router>
+        <PageTracker />
+        <DemoNotice />
+        <Routes>
+          <Route path="/" element={<AdGenerator />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/qa-docs" element={<QADocs />} />
+          <Route path="/login" element={<Login onLogin={setIsLoggedIn} />} />
+          <Route path="/signup" element={<Signup onSignup={setIsLoggedIn} />} />
+          <Route path="/auth/success" element={<AuthSuccess />} />
+          <Route path="/auth/error" element={<AuthError />} />
+        </Routes>
+      </Router>
+    </Sentry.ErrorBoundary>
   );
 }
 
