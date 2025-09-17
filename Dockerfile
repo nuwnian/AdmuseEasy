@@ -31,6 +31,8 @@ USER admuse
 
 # Set production environment
 ENV NODE_ENV=production
+ENV PORT=5000
+ENV WEBSITE_HOSTNAME=admuse-easy.azurewebsites.net
 
 # Expose port
 EXPOSE 5000
