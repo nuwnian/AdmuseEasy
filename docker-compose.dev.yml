@@ -1,11 +1,12 @@
-version: '3.8'
-
 services:
   # Development version with live code reloading
   admuse-app:
     build: .
     ports:
       - "5000:5000"
+    # Disable health check in development (nodemon restarts cause issues)
+    healthcheck:
+      disable: true
     environment:
       - NODE_ENV=development
       - PORT=5000

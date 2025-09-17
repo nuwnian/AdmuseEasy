@@ -26,14 +26,23 @@ const User = require('./models/User');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Database connection
+// Database connection with hybrid support
 const connectDB = async () => {
   try {
-    // Make sure we load environment variables from the correct path
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/admuse-easy';
+    // Determine which database to use based on DB_MODE
+    const dbMode = process.env.DB_MODE || 'local';
+    let mongoURI;
     
+    if (dbMode === 'atlas') {
+      mongoURI = process.env.MONGODB_ATLAS;
+      console.log('🌐 Using Atlas MongoDB (Cloud - Multi-device access)');
+    } else {
+      mongoURI = process.env.MONGODB_LOCAL || 'mongodb://localhost:27017/admuse-easy';
+      console.log('🏠 Using Local MongoDB (Development - Fast & reliable)');
+    }
+    
+    console.log('Database mode:', dbMode);
     console.log('Attempting to connect to MongoDB...');
-    console.log('MongoDB URI configured:', mongoURI ? 'Yes' : 'No');
     
     await mongoose.connect(mongoURI, {
       // Connection options to handle timeouts and retries
@@ -45,9 +54,15 @@ const connectDB = async () => {
       w: 'majority'
     });
     
-    console.log('MongoDB connected successfully');
+    console.log(`✅ MongoDB connected successfully (${dbMode} mode)`);
   } catch (error) {
-    console.error('MongoDB connection error:', error.message);
+    const dbMode = process.env.DB_MODE || 'local';
+    console.error(`❌ MongoDB connection error (${dbMode} mode):`, error.message);
+    
+    // If Atlas fails, suggest fallback
+    if (dbMode === 'atlas') {
+      console.log('💡 Tip: Set DB_MODE=local in .env to use local database');
+    }
     console.error('Full error:', error);
     
     // Don't exit the process, continue without database for now
@@ -232,8 +247,8 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
   }
 });
 
-// Serve React build files (disabled for development)
-// app.use(express.static(path.join(__dirname, '../client/build')));
+// Serve React build files
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -248,11 +263,10 @@ app.get('/api/health', (req, res) => {
 app.use(sentryErrorHandler());
 
 // Fallback: serve React index.html for any unknown route (SPA support)
-// (disabled for development - frontend runs on separate port)
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, '../client/build/index.html'));
-// });
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}`);
 });
