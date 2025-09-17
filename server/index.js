@@ -248,14 +248,19 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
 });
 
 // Serve React build files
-app.use(express.static(path.join(__dirname, '../client/build')));
+const clientBuildPath = process.env.NODE_ENV === 'production' 
+  ? path.join(__dirname, 'client/build')  // Production: build is copied to server/client/build
+  : path.join(__dirname, '../client/build'); // Development: build is in parent directory
+
+app.use(express.static(clientBuildPath));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     message: 'AdmuseEasy API is running!',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    clientPath: clientBuildPath // Debug info
   });
 });
 
@@ -264,7 +269,27 @@ app.use(sentryErrorHandler());
 
 // Fallback: serve React index.html for any unknown route (SPA support)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  const indexPath = process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, 'client/build/index.html')
+    : path.join(__dirname, '../client/build/index.html');
+    
+  // Check if file exists before serving
+  if (require('fs').existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    console.error('Index.html not found at:', indexPath);
+    res.status(404).send(`
+      <h1>AdmuseEasy API Server</h1>
+      <p>API is running but client build not found.</p>
+      <p>Looking for: ${indexPath}</p>
+      <p>Available APIs:</p>
+      <ul>
+        <li><a href="/api/health">/api/health</a> - Server status</li>
+        <li><a href="/api/auth/google">/api/auth/google</a> - Google OAuth</li>
+        <li>POST /api/generate-copy - Generate marketing copy</li>
+      </ul>
+    `);
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
