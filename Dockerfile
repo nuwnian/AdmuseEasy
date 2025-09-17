@@ -24,15 +24,17 @@ COPY server/ ./
 # Copy built client from previous stage
 COPY --from=client-build /app/client/build ./client/build
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S admuse -u 1001
-USER admuse
-
-# Set production environment
+# Set production environment before user creation
 ENV NODE_ENV=production
 ENV PORT=5000
 ENV WEBSITE_HOSTNAME=admuse-easy.azurewebsites.net
+ENV DB_MODE=production
+ENV GOOGLE_API_KEY=dummy-key-for-startup
+
+# Create non-root user for security (commented out for Azure compatibility)
+# RUN addgroup -g 1001 -S nodejs
+# RUN adduser -S admuse -u 1001
+# USER admuse
 
 # Expose port
 EXPOSE 5000
