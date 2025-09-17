@@ -128,10 +128,16 @@ router.get('/google/callback',
       );
 
       // Redirect to frontend with token
-      res.redirect(`http://localhost:3000/auth/success?token=${token}`);
+      const frontendURL = process.env.WEBSITE_HOSTNAME 
+        ? `https://${process.env.WEBSITE_HOSTNAME}` 
+        : 'http://localhost:3000';
+      res.redirect(`${frontendURL}/auth/success?token=${token}`);
     } catch (error) {
       console.error('OAuth callback error:', error);
-      res.redirect('http://localhost:3000/auth/error');
+      const frontendURL = process.env.WEBSITE_HOSTNAME 
+        ? `https://${process.env.WEBSITE_HOSTNAME}` 
+        : 'http://localhost:3000';
+      res.redirect(`${frontendURL}/auth/error`);
     }
   }
 );
