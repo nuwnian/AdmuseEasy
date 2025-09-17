@@ -1,10 +1,14 @@
-name: Deploy to Azure Container Instances
+name: Deploy to Azure Container Instances [DISABLED]
+
+# This workflow is disabled to avoid conflicts with azure-deploy.yaml
+# To re-enable, rename to .yaml and add required secrets:
+# - AZURE_REGISTRY_USERNAME
+# - AZURE_REGISTRY_PASSWORD  
+# - AZURE_REGISTRY_LOGIN_SERVER
+# - AZURE_RESOURCE_GROUP
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
   build-and-deploy:
