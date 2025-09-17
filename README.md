@@ -4,7 +4,11 @@
 > 📊 **Status:** Production-ready with CI/CD deployment  
 > 💼 **Portfolio Project:** Showcasing full-stack development, DevOps, and QA practices
 
-AdmuseEasy is a professional SaaS platform that generates emotionally resonant marketing ads using AI-powered mascot personalities. This project demonstrates modern web development practices, cloud deployment, and enterprise-level features.
+# AdmuseEasy
+
+AdmuseEasy is a web application that allows users to manage and organize their creative projects. Built with modern web technologies, it provides an intuitive interface for project management and collaboration.
+
+🚀 **Now deployed with Azure Web App for Containers!**
 
 ## 🎯 Project Highlights
 
