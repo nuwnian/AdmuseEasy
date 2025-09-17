@@ -138,7 +138,8 @@ jobs:
           fi
         done
     
-    - name: Notify Sentry of deployment
+    - name: Notify Sentry of deployment (optional)
+      continue-on-error: true
       run: |
         curl -X POST "https://sentry.io/api/0/organizations/${{ secrets.SENTRY_ORG }}/releases/" \
           -H "Authorization: Bearer ${{ secrets.SENTRY_AUTH_TOKEN }}" \
