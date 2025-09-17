@@ -9,6 +9,7 @@
 AdmuseEasy is a web application that allows users to manage and organize their creative projects. Built with modern web technologies, it provides an intuitive interface for project management and collaboration.
 
 🚀 **Now deployed with Azure Web App for Containers!**
+✅ **Container deployment with simplified workflow**
 
 ## 🎯 Project Highlights
 
