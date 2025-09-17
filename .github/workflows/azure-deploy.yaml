@@ -91,6 +91,14 @@ jobs:
         rm -rf server/client
         mkdir -p server/client
         cp -r client/build server/client/
+        
+    - name: Verify build files copied
+      run: |
+        echo "Verifying build files..."
+        ls -la server/client/
+        ls -la server/client/build/
+        echo "Index.html exists:" 
+        test -f server/client/build/index.html && echo "✅ YES" || echo "❌ NO"
     
     - name: Install server dependencies
       run: |
@@ -103,6 +111,11 @@ jobs:
         app-name: 'Admuse-Easy'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: './server'
+        
+    - name: Verify Azure deployment paths
+      run: |
+        echo "Deployment package contents:"
+        find ./server -name "*.html" -o -name "*.js" -o -name "*.css" | head -20
         
     - name: Notify Sentry of deployment
       run: |

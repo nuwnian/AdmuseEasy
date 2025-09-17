@@ -247,20 +247,68 @@ app.post('/api/generate-copy', validateInput, async (req, res) => {
   }
 });
 
-// Serve React build files
-const clientBuildPath = process.env.NODE_ENV === 'production' 
-  ? path.join(__dirname, 'client/build')  // Production: build is copied to server/client/build
-  : path.join(__dirname, '../client/build'); // Development: build is in parent directory
+// Serve React build files with Azure-aware path resolution
+const getClientBuildPath = () => {
+  // Check for Azure deployment structure first
+  const azurePath = '/home/site/wwwroot/client/build';
+  if (require('fs').existsSync(azurePath)) {
+    console.log('🔍 Using Azure deployment path:', azurePath);
+    return azurePath;
+  }
+  
+  // Standard deployment structure
+  const standardPath = process.env.NODE_ENV === 'production' 
+    ? path.join(__dirname, 'client/build')  // Production: build is copied to server/client/build
+    : path.join(__dirname, '../client/build'); // Development: build is in parent directory
+    
+  console.log('🔍 Using standard deployment path:', standardPath);
+  return standardPath;
+};
 
+const clientBuildPath = getClientBuildPath();
 app.use(express.static(clientBuildPath));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+  const fs = require('fs');
+  
+  // Check what files are actually available
+  const checkPath = (pathToCheck, name) => {
+    try {
+      return {
+        name,
+        path: pathToCheck,
+        exists: fs.existsSync(pathToCheck),
+        files: fs.existsSync(pathToCheck) && fs.statSync(pathToCheck).isDirectory() 
+          ? fs.readdirSync(pathToCheck).slice(0, 5) 
+          : null
+      };
+    } catch (e) {
+      return { name, path: pathToCheck, exists: false, error: e.message };
+    }
+  };
+  
+  const pathChecks = [
+    checkPath(__dirname, 'Server directory'),
+    checkPath(path.join(__dirname, 'client'), 'Client directory'),
+    checkPath(path.join(__dirname, 'client/build'), 'Client build directory'),
+    checkPath('/home/site/wwwroot', 'Azure wwwroot'),
+    checkPath('/home/site/wwwroot/client', 'Azure client'),
+    checkPath('/home/site/wwwroot/client/build', 'Azure client build')
+  ];
+
   res.json({ 
     message: 'AdmuseEasy API is running!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    clientPath: clientBuildPath // Debug info
+    clientPath: clientBuildPath,
+    platform: process.platform,
+    cwd: process.cwd(),
+    pathChecks: pathChecks,
+    azure: {
+      siteName: process.env.WEBSITE_SITE_NAME || 'Not Azure',
+      home: process.env.HOME || 'undefined'
+    }
   });
 });
 
@@ -269,19 +317,52 @@ app.use(sentryErrorHandler());
 
 // Fallback: serve React index.html for any unknown route (SPA support)
 app.get('*', (req, res) => {
-  const indexPath = process.env.NODE_ENV === 'production'
-    ? path.join(__dirname, 'client/build/index.html')
-    : path.join(__dirname, '../client/build/index.html');
+  const getIndexPath = () => {
+    // Check for Azure deployment structure first
+    const azureIndexPath = '/home/site/wwwroot/client/build/index.html';
+    if (require('fs').existsSync(azureIndexPath)) {
+      return azureIndexPath;
+    }
+    
+    // Standard deployment structure
+    return process.env.NODE_ENV === 'production'
+      ? path.join(__dirname, 'client/build/index.html')
+      : path.join(__dirname, '../client/build/index.html');
+  };
+  
+  const indexPath = getIndexPath();
     
   // Check if file exists before serving
   if (require('fs').existsSync(indexPath)) {
+    console.log('✅ Serving index.html from:', indexPath);
     res.sendFile(indexPath);
   } else {
-    console.error('Index.html not found at:', indexPath);
+    console.error('❌ Index.html not found at:', indexPath);
+    
+    // Debug: List what files ARE available
+    const debugPaths = [
+      __dirname,
+      path.join(__dirname, 'client'),
+      '/home/site/wwwroot',
+      '/home/site/wwwroot/client'
+    ];
+    
+    debugPaths.forEach(debugPath => {
+      try {
+        if (require('fs').existsSync(debugPath)) {
+          const files = require('fs').readdirSync(debugPath);
+          console.log(`📂 ${debugPath}:`, files.slice(0, 10));
+        }
+      } catch (e) {
+        console.log(`❌ Cannot read ${debugPath}:`, e.message);
+      }
+    });
+    
     res.status(404).send(`
       <h1>AdmuseEasy API Server</h1>
       <p>API is running but client build not found.</p>
       <p>Looking for: ${indexPath}</p>
+      <p>Environment: ${process.env.NODE_ENV || 'development'}</p>
       <p>Available APIs:</p>
       <ul>
         <li><a href="/api/health">/api/health</a> - Server status</li>
