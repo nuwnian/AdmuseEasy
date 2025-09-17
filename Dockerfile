@@ -29,6 +29,9 @@ RUN addgroup -g 1001 -S nodejs
 RUN adduser -S admuse -u 1001
 USER admuse
 
+# Set production environment
+ENV NODE_ENV=production
+
 # Expose port
 EXPOSE 5000
 
