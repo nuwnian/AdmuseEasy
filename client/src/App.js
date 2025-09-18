@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import './App.css';
@@ -43,10 +42,10 @@ function ErrorFallback({ error, resetError }) {
       <button 
         onClick={resetError}
         style={{ 
-          background: '#007bff', 
-          color: 'white', 
-          border: 'none', 
-          padding: '10px 20px', 
+          background: '#007bff',
+          color: 'white',
+          border: 'none',
+          padding: '10px 20px',
           borderRadius: '4px',
           cursor: 'pointer',
           marginTop: '10px'
@@ -68,78 +67,15 @@ const mascots = [
   { key: 'panda', name: 'Zen Panda', mood: 'Focused', description: 'Balanced, mindful, and focused tone', icon: '/mascots/Panda-icon.png' },
 ];
 
-
-
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-
+function PageTracker() {
+  const location = useLocation();
   useEffect(() => {
-    // Check if user is logged in on app load
-    const token = localStorage.getItem('token');
+    trackPageView(location.pathname + location.search);
+  }, [location]);
+  return null;
+}
 
-    // Hamburger menu state
-    const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
-    // Close mobile nav on route change
-    const location = useLocation();
-    useEffect(() => { setMobileNavOpen(false); }, [location]);
-
-    return (
-      <div className="app">
-        {/* Navbar */}
-        <nav className={`navbar${showNavbar ? '' : ' navbar--hidden'}`}>
-          <div className="nav-container">
-            <div className="nav-logo">
-              <img src="/Admuse-Logo.png" alt="AdmuseEasy" className="logo-image" />
-              <span className="logo-text">AdmuseEasy</span>
-            </div>
-            <button className="nav-hamburger" aria-label="Open navigation menu" onClick={() => setMobileNavOpen(v => !v)}>
-              <span className="hamburger-bar"></span>
-              <span className="hamburger-bar"></span>
-              <span className="hamburger-bar"></span>
-            </button>
-            <div className={`nav-links${mobileNavOpen ? ' nav-links--open' : ''}`}>
-              <Link to="/" onClick={() => trackUserAction('nav_click', 'home')}>Ad Generator</Link>
-              <Link to="/about" onClick={() => trackUserAction('nav_click', 'about')}>About</Link>
-              <Link to="/qa-docs" onClick={() => trackUserAction('nav_click', 'qa_docs')}>QA Documentation</Link>
-              {isLoggedIn ? (
-                <div className="auth-links">
-                  <span className="user-info"> {user?.email}</span>
-                  <button onClick={handleLogout} className="logout-btn">Logout</button>
-                </div>
-              ) : (
-                <div className="auth-links">
-                  <Link to="/login" onClick={() => trackUserAction('nav_click', 'login')}>Login</Link>
-                  <Link to="/signup" onClick={() => trackUserAction('nav_click', 'signup')}>Sign Up</Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </nav>
-  }
-
-  const AdGenerator = () => {
-  const [showNavbar, setShowNavbar] = useState(true);
-  const lastScrollY = useRef(window.scrollY);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY < 40) {
-        setShowNavbar(true);
-        lastScrollY.current = window.scrollY;
-        return;
-      }
-      if (window.scrollY > lastScrollY.current) {
-        setShowNavbar(false); // scrolling down
-      } else {
-        setShowNavbar(true); // scrolling up
-      }
-      lastScrollY.current = window.scrollY;
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+const AdGenerator = ({isLoggedIn, user, handleLogout}) => {
   const [product, setProduct] = useState({ name: '', description: '', audience: '' });
   const [mascot, setMascot] = useState(mascots[0].key);
   // Removed format state
@@ -203,32 +139,6 @@ function App() {
 
     return (
       <div className="app">
-      {/* Navbar */}
-  <nav className={`navbar${showNavbar ? '' : ' navbar--hidden'}`}>
-        <div className="nav-container">
-          <div className="nav-logo">
-            <img src="/Admuse-Logo.png" alt="AdmuseEasy" className="logo-image" />
-            <span className="logo-text">AdmuseEasy</span>
-          </div>
-          <div className="nav-links">
-            <Link to="/" onClick={() => trackUserAction('nav_click', 'home')}>Ad Generator</Link>
-            <Link to="/about" onClick={() => trackUserAction('nav_click', 'about')}>About</Link>
-            <Link to="/qa-docs" onClick={() => trackUserAction('nav_click', 'qa_docs')}>QA Documentation</Link>
-            {isLoggedIn ? (
-              <div className="auth-links">
-                <span className="user-info">👤 {user?.email}</span>
-                <button onClick={handleLogout} className="logout-btn">Logout</button>
-              </div>
-            ) : (
-              <div className="auth-links">
-                <Link to="/login" onClick={() => trackUserAction('nav_click', 'login')}>Login</Link>
-                <Link to="/signup" onClick={() => trackUserAction('nav_click', 'signup')}>Sign Up</Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-
       <div className="dashboard">
       <div className="input-section">
         <div className="input-group">
@@ -293,6 +203,98 @@ function App() {
     );
   };
 
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(true);
+  const lastScrollY = useRef(window.scrollY);
+  const location = useLocation();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setUser(null);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      // You might want to fetch user data here and setUser
+    }
+  }, []);
+
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY < 40) {
+        setShowNavbar(true);
+        lastScrollY.current = window.scrollY;
+        return;
+      }
+      if (window.scrollY > lastScrollY.current) {
+        setShowNavbar(false); // scrolling down
+      } else {
+        setShowNavbar(true); // scrolling up
+      }
+      lastScrollY.current = window.scrollY;
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location]);
+
+  return (
+    <div className="app">
+      {/* Navbar */}
+      <nav className={`navbar${showNavbar ? '' : ' navbar--hidden'}`}>
+        <div className="nav-container">
+          <div className="nav-logo">
+            <img src="/Admuse-Logo.png" alt="AdmuseEasy" className="logo-image" />
+            <span className="logo-text">AdmuseEasy</span>
+          </div>
+          <button className="nav-hamburger" aria-label="Open navigation menu" onClick={() => setMobileNavOpen(v => !v)}>
+            <span className="hamburger-bar"></span>
+            <span className="hamburger-bar"></span>
+            <span className="hamburger-bar"></span>
+          </button>
+          <div className={`nav-links${mobileNavOpen ? ' nav-links--open' : ''}`}>
+            <Link to="/" onClick={() => trackUserAction('nav_click', 'home')}>Ad Generator</Link>
+            <Link to="/about" onClick={() => trackUserAction('nav_click', 'about')}>About</Link>
+            <Link to="/qa-docs" onClick={() => trackUserAction('nav_click', 'qa_docs')}>QA Documentation</Link>
+            {isLoggedIn ? (
+              <div className="auth-links">
+                <span className="user-info">👤 {user?.email}</span>
+                <button onClick={handleLogout} className="logout-btn">Logout</button>
+              </div>
+            ) : (
+              <div className="auth-links">
+                <Link to="/login" onClick={() => trackUserAction('nav_click', 'login')}>Login</Link>
+                <Link to="/signup" onClick={() => trackUserAction('nav_click', 'signup')}>Sign Up</Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<AdGenerator isLoggedIn={isLoggedIn} user={user} handleLogout={handleLogout} />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/qa-docs" element={<QADocs />} />
+        <Route path="/login" element={<Login onLogin={setIsLoggedIn} />} />
+        <Route path="/signup" element={<Signup onSignup={setIsLoggedIn} />} />
+        <Route path="/auth/success" element={<AuthSuccess />} />
+        <Route path="/auth/error" element={<AuthError />} />
+      </Routes>
+    </div>
+  );
+}
+
+function AppWrapper() {
   return (
     <Sentry.ErrorBoundary fallback={ErrorFallback} beforeCapture={(scope) => {
       scope.setTag("location", "App");
@@ -300,18 +302,10 @@ function App() {
       <Router>
         <PageTracker />
         <DemoNotice />
-        <Routes>
-          <Route path="/" element={<AdGenerator />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/qa-docs" element={<QADocs />} />
-          <Route path="/login" element={<Login onLogin={setIsLoggedIn} />} />
-          <Route path="/signup" element={<Signup onSignup={setIsLoggedIn} />} />
-          <Route path="/auth/success" element={<AuthSuccess />} />
-          <Route path="/auth/error" element={<AuthError />} />
-        </Routes>
+        <App />
       </Router>
     </Sentry.ErrorBoundary>
   );
 }
 
-export default App;
+export default AppWrapper;
