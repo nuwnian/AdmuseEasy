@@ -81,23 +81,35 @@ function Login({ onLogin }) {
 
   return (
     <div className="auth-container glass-effect">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-        <h2>Login to AdmuseEasy</h2>
+      <nav style={{ marginBottom: '1rem' }}>
         <button 
           onClick={handleBackToDashboard}
           style={{
-            background: '#6c757d',
+            color: '#3498db',
+            textDecoration: 'none',
+            fontWeight: '500',
+            padding: '0.5rem 1rem',
+            borderRadius: '6px',
+            transition: 'all 0.3s ease',
+            display: 'inline-block',
+            background: 'transparent',
             border: 'none',
-            padding: '8px 16px',
-            fontSize: '14px',
-            borderRadius: '5px',
-            color: 'white',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(52, 152, 219, 0.1)';
+            e.target.style.color = '#2980b9';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'transparent';
+            e.target.style.color = '#3498db';
           }}
         >
-          Back to Dashboard
+          ← Back to Dashboard
         </button>
-      </div>
+      </nav>
+      <h2>Login to AdmuseEasy</h2>
       
       {/* OAuth Login Option (if available) */}
       {authStatus?.modes?.oauth && (
