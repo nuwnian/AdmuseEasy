@@ -45,9 +45,12 @@ router.post('/register', [
         name
       };
 
+      // Use a consistent fallback secret for demo mode
+      const demoSecret = process.env.JWT_SECRET || 'demo-fallback-secret-for-development-only';
+      
       const token = jwt.sign(
         { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
-        process.env.JWT_SECRET || 'fallback-secret',
+        demoSecret,
         { expiresIn: '7d' }
       );
 
@@ -95,7 +98,13 @@ router.post('/register', [
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error stack:', error.stack);
+    console.error('Demo mode status:', process.env.DEMO_MODE);
+    console.error('MongoDB connection state:', mongoose.connection.readyState);
+    res.status(500).json({ 
+      message: 'Server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -123,9 +132,12 @@ router.post('/login', [
         name: email.split('@')[0] // Use part before @ as name
       };
 
+      // Use a consistent fallback secret for demo mode
+      const demoSecret = process.env.JWT_SECRET || 'demo-fallback-secret-for-development-only';
+
       const token = jwt.sign(
         { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
-        process.env.JWT_SECRET || 'fallback-secret',
+        demoSecret,
         { expiresIn: '7d' }
       );
 
@@ -176,7 +188,13 @@ router.post('/login', [
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error stack:', error.stack);
+    console.error('Demo mode status:', process.env.DEMO_MODE);
+    console.error('MongoDB connection state:', mongoose.connection.readyState);
+    res.status(500).json({ 
+      message: 'Server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
