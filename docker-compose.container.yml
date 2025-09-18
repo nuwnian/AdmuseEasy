@@ -9,8 +9,8 @@ services:
     container_name: admuse-mongodb
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-change-this-password}
       MONGO_INITDB_DATABASE: admuse-easy
     ports:
       - "27017:27017"
@@ -30,8 +30,8 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5000
-      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/admuse-easy?authSource=admin
-      - JWT_SECRET=your-super-secret-jwt-key-for-development
+      - MONGODB_URI=mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-change-this-password}@mongodb:27017/admuse-easy?authSource=admin
+      - JWT_SECRET=${JWT_SECRET:-please-change-this-jwt-secret-in-production}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}

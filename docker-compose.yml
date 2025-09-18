@@ -9,7 +9,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=5000
-      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/admuse?authSource=admin
+      - MONGODB_URI=mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-change-this-password}@mongodb:27017/admuse?authSource=admin
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - JWT_SECRET=${JWT_SECRET:-development-secret-key}

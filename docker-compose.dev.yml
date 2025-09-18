@@ -10,8 +10,8 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=5000
-      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/admuse?authSource=admin
-      - JWT_SECRET=development-secret-key
+      - MONGODB_URI=mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-change-this-password}@mongodb:27017/admuse?authSource=admin
+      - JWT_SECRET=${JWT_SECRET:-development-secret-key}
       - CHOKIDAR_USEPOLLING=true  # For file watching in Docker
     volumes:
       # Mount your code for live changes (no rebuild needed!)
