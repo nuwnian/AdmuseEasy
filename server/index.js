@@ -387,5 +387,12 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log('🚀 AdmuseEasy Server Started Successfully!');
+  console.log(`📍 Server URL: http://0.0.0.0:${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🎭 Demo Mode: ${process.env.DEMO_MODE === 'true' ? 'ENABLED' : 'DISABLED'}`);
+  console.log(`🗄️ Database: ${mongoose.connection.readyState === 1 ? 'CONNECTED' : 'DISCONNECTED'}`);
+  console.log(`🔐 OAuth Available: ${!!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) ? 'YES' : 'NO'}`);
+  console.log(`📊 Health Check: http://0.0.0.0:${PORT}/api/health`);
+  console.log('⚡ Ready to handle requests!');
 });

@@ -1,17 +1,49 @@
-# Ignore files for Docker builds
-node_modules
-npm-debug.log
+# Node modules
+node_modules/
+*/node_modules/
+
+# Environment files
 .env
-.git
+.env.*
+server/.env*
+server/.env.backup*
+
+# Git files
+.git/
 .gitignore
+.github/
+
+# Documentation
 README.md
-.vscode
-.github
 *.md
-client/node_modules
-client/build
-server/node_modules
-.DS_Store
+docs/
+
+# Build artifacts (we'll build inside Docker)
+client/build/
+dist/
+coverage/
+.nyc_output/
+
+# Logs
 *.log
-coverage
-.nyc_output
+logs/
+server/logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker files
+docker-compose*.yml
+.dockerignore
+
+# Test files
+cypress/
+*.test.js
+**/*.test.js
