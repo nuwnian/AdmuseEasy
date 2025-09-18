@@ -77,33 +77,46 @@ function App() {
   useEffect(() => {
     // Check if user is logged in on app load
     const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-      // You could decode the JWT here to get user info
-      setUser({ email: 'user@example.com' }); // Placeholder
-      
-      // Set user properties for analytics
-      setUserProperties('user_id', { email: 'user@example.com' });
-    }
-  }, []);
 
-  const handleLogout = () => {
-    trackUserAction('logout', 'navbar');
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    setUser(null);
-    window.location.href = '/';
-  };
+    // Hamburger menu state
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  // Component to track page views
-  function PageTracker() {
+    // Close mobile nav on route change
     const location = useLocation();
-    
-    useEffect(() => {
-      trackPageView(location.pathname);
-    }, [location]);
-    
-    return null;
+    useEffect(() => { setMobileNavOpen(false); }, [location]);
+
+    return (
+      <div className="app">
+        {/* Navbar */}
+        <nav className={`navbar${showNavbar ? '' : ' navbar--hidden'}`}>
+          <div className="nav-container">
+            <div className="nav-logo">
+              <img src="/Admuse-Logo.png" alt="AdmuseEasy" className="logo-image" />
+              <span className="logo-text">AdmuseEasy</span>
+            </div>
+            <button className="nav-hamburger" aria-label="Open navigation menu" onClick={() => setMobileNavOpen(v => !v)}>
+              <span className="hamburger-bar"></span>
+              <span className="hamburger-bar"></span>
+              <span className="hamburger-bar"></span>
+            </button>
+            <div className={`nav-links${mobileNavOpen ? ' nav-links--open' : ''}`}>
+              <Link to="/" onClick={() => trackUserAction('nav_click', 'home')}>Ad Generator</Link>
+              <Link to="/about" onClick={() => trackUserAction('nav_click', 'about')}>About</Link>
+              <Link to="/qa-docs" onClick={() => trackUserAction('nav_click', 'qa_docs')}>QA Documentation</Link>
+              {isLoggedIn ? (
+                <div className="auth-links">
+                  <span className="user-info"> {user?.email}</span>
+                  <button onClick={handleLogout} className="logout-btn">Logout</button>
+                </div>
+              ) : (
+                <div className="auth-links">
+                  <Link to="/login" onClick={() => trackUserAction('nav_click', 'login')}>Login</Link>
+                  <Link to="/signup" onClick={() => trackUserAction('nav_click', 'signup')}>Sign Up</Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </nav>
   }
 
   const AdGenerator = () => {
