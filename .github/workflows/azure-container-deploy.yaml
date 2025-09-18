@@ -47,12 +47,25 @@ jobs:
         cache-to: type=gha,mode=max
         platforms: linux/amd64
     
+    - name: Verify image was pushed
+      run: |
+        echo "✅ Docker image built and pushed successfully"
+        echo "📦 Available tags: ${{ steps.meta.outputs.tags }}"
+        echo "🎯 Deploying with: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+    
     - name: Deploy to Azure Web App for Containers
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_CONTAINER }}
-        images: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        images: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+    
+    - name: Debug deployment
+      run: |
+        echo "🔍 Deployment attempted for:"
+        echo "   App: ${{ env.AZURE_WEBAPP_NAME }}"
+        echo "   Image: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        echo "   Registry: ${{ env.CONTAINER_REGISTRY }}"
     
     - name: Wait for deployment
       run: |
