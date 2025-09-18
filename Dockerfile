@@ -30,6 +30,7 @@ ENV PORT=5000
 ENV WEBSITE_HOSTNAME=admuse-easy.azurewebsites.net
 ENV DB_MODE=production
 ENV GOOGLE_API_KEY=dummy-key-for-startup
+ENV DEMO_MODE=true
 
 # Create non-root user for security (commented out for Azure compatibility)
 # RUN addgroup -g 1001 -S nodejs

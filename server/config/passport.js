@@ -2,6 +2,8 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
+// OAuth disabled for demo deployment - using mock authentication instead
+/* 
 // Only configure Google Strategy if credentials are available
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   const baseURL = process.env.WEBSITE_HOSTNAME 
@@ -53,6 +55,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 } else {
   console.log('Google OAuth credentials not configured, skipping Google Strategy setup');
 }
+*/
+console.log('OAuth disabled for demo - using mock authentication');
 
 passport.serializeUser((user, done) => {
   done(null, user._id);

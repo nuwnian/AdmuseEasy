@@ -7,17 +7,22 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-// Middleware to check database connection (temporarily disabled for testing)
+// Database connection check disabled for demo deployment
+// const checkDbConnection = (req, res, next) => {
+//   console.log('Database connection check - State:', mongoose.connection.readyState);
+//   // Temporarily bypass the check to test other functionality
+//   next();
+// };
+
+// Simple middleware that always passes for demo
 const checkDbConnection = (req, res, next) => {
-  console.log('Database connection check - State:', mongoose.connection.readyState);
-  // Temporarily bypass the check to test other functionality
+  console.log('Demo mode - bypassing database checks');
   next();
 };
 
-// Register
-router.post('/register', checkDbConnection, [
+// Demo register - no database, just returns success
+router.post('/register', [
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 6 }),
   body('name').trim().isLength({ min: 2 })
 ], async (req, res) => {
   try {
@@ -26,44 +31,36 @@ router.post('/register', checkDbConnection, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, name } = req.body;
+    const { email, name } = req.body;
 
-    // Check if user exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // Create user
-    const user = new User({ email, password, name });
-    await user.save();
+    // Demo mode - create mock user without database
+    const mockUser = {
+      id: 'demo-user-' + Date.now(),
+      email,
+      name
+    };
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '7d' }
     );
 
     res.status(201).json({
-      message: 'User created successfully',
+      message: 'Demo user created successfully',
       token,
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name
-      }
+      user: mockUser
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Demo registration error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Login
-router.post('/login', checkDbConnection, [
-  body('email').isEmail().normalizeEmail(),
-  body('password').exists()
+// Demo login - no database, accepts any email
+router.post('/login', [
+  body('email').isEmail().normalizeEmail()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -71,46 +68,35 @@ router.post('/login', checkDbConnection, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    const { email } = req.body;
 
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    // Demo mode - accept any email, create mock user
+    const mockUser = {
+      id: 'demo-user-' + Date.now(),
+      email,
+      name: email.split('@')[0] // Use part before @ as name
+    };
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id },
+      { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '7d' }
     );
 
     res.json({
-      message: 'Login successful',
+      message: 'Demo login successful',
       token,
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name
-      }
+      user: mockUser
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Demo login error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
+// Google OAuth routes disabled for demo deployment
+/* 
 // Google OAuth routes
 router.get('/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -141,5 +127,35 @@ router.get('/google/callback',
     }
   }
 );
+*/
+
+// Mock authentication endpoint for demo
+router.post('/demo-login', async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    
+    // Generate a demo token with mock user data
+    const mockUser = {
+      id: 'demo-user-' + Date.now(),
+      email: email || 'demo@example.com',
+      name: name || 'Demo User'
+    };
+    
+    const token = jwt.sign(
+      { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
+    
+    res.json({
+      message: 'Demo login successful',
+      token,
+      user: mockUser
+    });
+  } catch (error) {
+    console.error('Demo login error:', error);
+    res.status(500).json({ message: 'Demo login failed' });
+  }
+});
 
 module.exports = router;

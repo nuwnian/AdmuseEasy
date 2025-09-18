@@ -26,9 +26,15 @@ const User = require('./models/User');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Database connection with hybrid support
+// Database connection with optional fallback for demo mode
 const connectDB = async () => {
   try {
+    // Check if we should skip database connection for demo mode
+    if (process.env.DEMO_MODE === 'true') {
+      console.log('🎭 Demo mode - skipping database connection');
+      return;
+    }
+    
     // Determine which database to use based on DB_MODE
     const dbMode = process.env.DB_MODE || 'local';
     let mongoURI;
@@ -65,8 +71,8 @@ const connectDB = async () => {
     }
     console.error('Full error:', error);
     
-    // Don't exit the process, continue without database for now
-    console.log('Continuing without database connection...');
+    // Don't exit the process, continue without database for demo
+    console.log('🎭 Continuing in demo mode without database connection...');
   }
 };
 
@@ -82,17 +88,23 @@ app.use(helmet());
 app.use(sentryRequestHandler());
 app.use(sentryTracingHandler());
 
-// Session configuration for OAuth
-app.use(session({
-  secret: process.env.JWT_SECRET || 'fallback-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false } // Set to true in production with HTTPS
-}));
+// Session and Passport configuration (optional for demo mode)
+if (process.env.DEMO_MODE !== 'true') {
+  // Session configuration for OAuth
+  app.use(session({
+    secret: process.env.JWT_SECRET || 'fallback-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // Set to true in production with HTTPS
+  }));
 
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+  // Initialize Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+  console.log('🔐 OAuth session support enabled');
+} else {
+  console.log('🎭 Demo mode - OAuth session support disabled');
+}
 
 // Security: Restrict CORS to specific origins
 app.use(cors({
@@ -222,22 +234,27 @@ const validateInput = (req, res, next) => {
   next();
 };
 
-// API: Generate ad copy with AI (updated with user tracking)
+// API: Generate ad copy with AI (updated with optional user tracking for demo)
 app.post('/api/generate-copy', validateInput, async (req, res) => {
   try {
     const { product, mascot } = req.body;
     const copy = await generateAICopy(product, mascot);
     
-    // Track usage if user is authenticated
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (token) {
-      try {
-        const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-        await User.findByIdAndUpdate(decoded.userId, { $inc: { usageCount: 1 } });
-      } catch (err) {
-        // Continue without tracking if token is invalid
+    // Track usage if user is authenticated and not in demo mode
+    if (process.env.DEMO_MODE !== 'true') {
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (token) {
+        try {
+          const jwt = require('jsonwebtoken');
+          const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+          await User.findByIdAndUpdate(decoded.userId, { $inc: { usageCount: 1 } });
+        } catch (err) {
+          // Continue without tracking if token is invalid
+          console.log('Token verification failed, continuing without tracking');
+        }
       }
+    } else {
+      console.log('🎭 Demo mode - skipping usage tracking');
     }
     
     res.json({ copy, powered_by: 'AI' });
