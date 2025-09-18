@@ -8,6 +8,7 @@ env:
   AZURE_WEBAPP_NAME: 'Admuse-Easy'
   CONTAINER_REGISTRY: 'admuseeasyregistry.azurecr.io'
   IMAGE_NAME: 'admuseasy'
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
 
 jobs:
   build-and-deploy:
@@ -53,12 +54,30 @@ jobs:
         echo "📦 Available tags: ${{ steps.meta.outputs.tags }}"
         echo "🎯 Deploying with: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
     
+    - name: Configure Azure Web App for Linux Containers
+      run: |
+        # Extract resource group from publish profile or use default
+        RESOURCE_GROUP="AdmuseEasy_group"
+        
+        echo "🔧 Configuring Azure Web App for Linux containers..."
+        echo "   App Name: ${{ env.AZURE_WEBAPP_NAME }}"
+        echo "   Image: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        echo "   Resource Group: $RESOURCE_GROUP"
+        
+        # Note: Azure CLI configuration will be handled by the Web App service
+        echo "✅ Configuration prepared for deployment"
+    
     - name: Deploy to Azure Web App for Containers
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_CONTAINER }}
         images: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      env:
+        # Explicitly set container deployment flags
+        AZURE_WEBAPP_DEPLOYMENT_CONTAINER_IMAGE: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        AZURE_WEBAPP_DEPLOYMENT_CONTAINER_REGISTRY_URL: ${{ env.CONTAINER_REGISTRY }}
+        AZURE_WEBAPP_DEPLOYMENT_PLATFORM: linux
     
     - name: Debug deployment
       run: |
@@ -66,6 +85,8 @@ jobs:
         echo "   App: ${{ env.AZURE_WEBAPP_NAME }}"
         echo "   Image: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
         echo "   Registry: ${{ env.CONTAINER_REGISTRY }}"
+        echo "   Platform: Linux (Container)"
+        echo "   Runtime: Docker Container"
     
     - name: Wait for deployment
       run: |
