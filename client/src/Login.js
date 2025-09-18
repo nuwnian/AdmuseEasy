@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [authStatus, setAuthStatus] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Check authentication capabilities on component mount
   useEffect(() => {
@@ -65,6 +66,10 @@ function Login({ onLogin }) {
     window.location.href = `${apiUrl}/api/auth/google`;
   };
 
+  const handleBackToDashboard = () => {
+    navigate('/');
+  };
+
   if (loading) {
     return (
       <div className="auth-container glass-effect">
@@ -76,7 +81,23 @@ function Login({ onLogin }) {
 
   return (
     <div className="auth-container glass-effect">
-      <h2>🔐 Login to AdmuseEasy</h2>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
+        <h2>Login to AdmuseEasy</h2>
+        <button 
+          onClick={handleBackToDashboard}
+          style={{
+            background: '#6c757d',
+            border: 'none',
+            padding: '8px 16px',
+            fontSize: '14px',
+            borderRadius: '5px',
+            color: 'white',
+            cursor: 'pointer'
+          }}
+        >
+          Back to Dashboard
+        </button>
+      </div>
       
       {/* OAuth Login Option (if available) */}
       {authStatus?.modes?.oauth && (

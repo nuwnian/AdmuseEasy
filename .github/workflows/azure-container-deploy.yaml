@@ -50,22 +50,22 @@ jobs:
     
     - name: Verify image was pushed
       run: |
-        echo "✅ Docker image built and pushed successfully"
-        echo "📦 Available tags: ${{ steps.meta.outputs.tags }}"
-        echo "🎯 Deploying with: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        echo "Docker image built and pushed successfully"
+        echo "Available tags: ${{ steps.meta.outputs.tags }}"
+        echo "Deploying with: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
     
     - name: Configure Azure Web App for Linux Containers
       run: |
         # Extract resource group from publish profile or use default
         RESOURCE_GROUP="AdmuseEasy_group"
         
-        echo "🔧 Configuring Azure Web App for Linux containers..."
+        echo "Configuring Azure Web App for Linux containers..."
         echo "   App Name: ${{ env.AZURE_WEBAPP_NAME }}"
         echo "   Image: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
         echo "   Resource Group: $RESOURCE_GROUP"
         
         # Note: Azure CLI configuration will be handled by the Web App service
-        echo "✅ Configuration prepared for deployment"
+        echo "Configuration prepared for deployment"
     
     - name: Deploy to Azure Web App for Containers
       uses: azure/webapps-deploy@v3
@@ -81,7 +81,7 @@ jobs:
     
     - name: Debug deployment
       run: |
-        echo "🔍 Deployment attempted for:"
+        echo "Deployment attempted for:"
         echo "   App: ${{ env.AZURE_WEBAPP_NAME }}"
         echo "   Image: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
         echo "   Registry: ${{ env.CONTAINER_REGISTRY }}"
@@ -100,10 +100,10 @@ jobs:
         
         # Simple health check
         if curl -f -m 30 https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/api/health; then
-          echo "✅ Deployment successful!"
+          echo "Deployment successful!"
         else
-          echo "⚠️ Health check failed, but deployment may still be starting..."
+          echo "Health check failed, but deployment may still be starting..."
         fi
         
-        echo "🚀 Deployment completed!"
-        echo "🌐 Live at: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+        echo "Deployment completed!"
+        echo "Live at: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
