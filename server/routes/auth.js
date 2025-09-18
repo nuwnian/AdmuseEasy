@@ -20,7 +20,7 @@ const checkDbConnection = (req, res, next) => {
   next();
 };
 
-// Demo register - no database, just returns success
+// Hybrid register - uses database when available, demo mode as fallback
 router.post('/register', [
   body('email').isEmail().normalizeEmail(),
   body('name').trim().isLength({ min: 2 })
@@ -31,34 +31,75 @@ router.post('/register', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, name } = req.body;
+    const { email, name, password } = req.body;
 
-    // Demo mode - create mock user without database
-    const mockUser = {
-      id: 'demo-user-' + Date.now(),
-      email,
-      name
-    };
+    // Check if we're in demo mode or database is unavailable
+    const isDemoMode = process.env.DEMO_MODE === 'true' || mongoose.connection.readyState !== 1;
+    
+    if (isDemoMode) {
+      // Demo mode - create mock user without database
+      console.log('🎭 Demo registration for:', email);
+      const mockUser = {
+        id: 'demo-user-' + Date.now(),
+        email,
+        name
+      };
 
-    // Generate token
+      const token = jwt.sign(
+        { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '7d' }
+      );
+
+      return res.status(201).json({
+        message: 'Demo user created successfully',
+        token,
+        user: mockUser,
+        mode: 'demo'
+      });
+    }
+
+    // Full mode - use database
+    console.log('🔐 Full registration for:', email);
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Create user with or without password
+    const userData = { email, name };
+    if (password) {
+      userData.password = password;
+    }
+    
+    const user = new User(userData);
+    await user.save();
+
     const token = jwt.sign(
-      { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
+      { userId: user._id },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '7d' }
     );
 
     res.status(201).json({
-      message: 'Demo user created successfully',
+      message: 'User created successfully',
       token,
-      user: mockUser
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name
+      },
+      mode: 'full'
     });
   } catch (error) {
-    console.error('Demo registration error:', error);
+    console.error('Registration error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Demo login - no database, accepts any email
+// Hybrid login - uses database when available, demo mode as fallback
 router.post('/login', [
   body('email').isEmail().normalizeEmail()
 ], async (req, res) => {
@@ -68,66 +109,131 @@ router.post('/login', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email } = req.body;
+    const { email, password } = req.body;
 
-    // Demo mode - accept any email, create mock user
-    const mockUser = {
-      id: 'demo-user-' + Date.now(),
-      email,
-      name: email.split('@')[0] // Use part before @ as name
-    };
+    // Check if we're in demo mode or database is unavailable
+    const isDemoMode = process.env.DEMO_MODE === 'true' || mongoose.connection.readyState !== 1;
+    
+    if (isDemoMode) {
+      // Demo mode - accept any email, create mock user
+      console.log('🎭 Demo login for:', email);
+      const mockUser = {
+        id: 'demo-user-' + Date.now(),
+        email,
+        name: email.split('@')[0] // Use part before @ as name
+      };
 
-    // Generate token
+      const token = jwt.sign(
+        { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '7d' }
+      );
+
+      return res.json({
+        message: 'Demo login successful',
+        token,
+        user: mockUser,
+        mode: 'demo'
+      });
+    }
+
+    // Full mode - use database
+    console.log('🔐 Full login for:', email);
+    
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Check password if provided and user has password
+    if (password && user.password) {
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid credentials' });
+      }
+    }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
     const token = jwt.sign(
-      { userId: mockUser.id, email: mockUser.email, name: mockUser.name },
+      { userId: user._id },
       process.env.JWT_SECRET || 'fallback-secret',
       { expiresIn: '7d' }
     );
 
     res.json({
-      message: 'Demo login successful',
+      message: 'Login successful',
       token,
-      user: mockUser
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name
+      },
+      mode: 'full'
     });
   } catch (error) {
-    console.error('Demo login error:', error);
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Google OAuth routes disabled for demo deployment
-/* 
-// Google OAuth routes
-router.get('/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+// Hybrid OAuth routes - available when not in demo mode and credentials exist
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.DEMO_MODE !== 'true') {
+  // Google OAuth routes
+  router.get('/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+  );
 
-router.get('/google/callback',
-  passport.authenticate('google', { session: false }),
-  async (req, res) => {
-    try {
-      // Generate JWT token
-      const token = jwt.sign(
-        { userId: req.user._id },
-        process.env.JWT_SECRET || 'fallback-secret',
-        { expiresIn: '7d' }
-      );
+  router.get('/google/callback',
+    passport.authenticate('google', { session: false }),
+    async (req, res) => {
+      try {
+        // Generate JWT token
+        const token = jwt.sign(
+          { userId: req.user._id },
+          process.env.JWT_SECRET || 'fallback-secret',
+          { expiresIn: '7d' }
+        );
 
-      // Redirect to frontend with token
-      const frontendURL = process.env.WEBSITE_HOSTNAME 
-        ? `https://${process.env.WEBSITE_HOSTNAME}` 
-        : 'http://localhost:3000';
-      res.redirect(`${frontendURL}/auth/success?token=${token}`);
-    } catch (error) {
-      console.error('OAuth callback error:', error);
-      const frontendURL = process.env.WEBSITE_HOSTNAME 
-        ? `https://${process.env.WEBSITE_HOSTNAME}` 
-        : 'http://localhost:3000';
-      res.redirect(`${frontendURL}/auth/error`);
+        // Redirect to frontend with token
+        const frontendURL = process.env.WEBSITE_HOSTNAME 
+          ? `https://${process.env.WEBSITE_HOSTNAME}` 
+          : 'http://localhost:3000';
+        res.redirect(`${frontendURL}/auth/success?token=${token}`);
+      } catch (error) {
+        console.error('OAuth callback error:', error);
+        const frontendURL = process.env.WEBSITE_HOSTNAME 
+          ? `https://${process.env.WEBSITE_HOSTNAME}` 
+          : 'http://localhost:3000';
+        res.redirect(`${frontendURL}/auth/error`);
+      }
     }
-  }
-);
-*/
+  );
+  
+  console.log('🔐 Google OAuth routes enabled');
+} else {
+  console.log('🎭 Google OAuth routes disabled - demo mode or missing credentials');
+}
+
+// Auth status endpoint - tells frontend which auth methods are available
+router.get('/status', (req, res) => {
+  const hasOAuth = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.DEMO_MODE !== 'true');
+  const hasDatabase = mongoose.connection.readyState === 1;
+  const isDemoMode = process.env.DEMO_MODE === 'true' || !hasDatabase;
+  
+  res.json({
+    modes: {
+      demo: true, // Always available as fallback
+      oauth: hasOAuth,
+      database: hasDatabase
+    },
+    active_mode: isDemoMode ? 'demo' : 'full',
+    demo_mode: isDemoMode
+  });
+});
 
 // Mock authentication endpoint for demo
 router.post('/demo-login', async (req, res) => {

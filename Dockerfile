@@ -28,9 +28,8 @@ COPY --from=client-build /app/client/build ./client/build
 ENV NODE_ENV=production
 ENV PORT=5000
 ENV WEBSITE_HOSTNAME=admuse-easy.azurewebsites.net
-ENV DB_MODE=production
 ENV GOOGLE_API_KEY=dummy-key-for-startup
-ENV DEMO_MODE=true
+# ENV DEMO_MODE=true  # Commented out - let environment control this
 
 # Create non-root user for security (commented out for Azure compatibility)
 # RUN addgroup -g 1001 -S nodejs

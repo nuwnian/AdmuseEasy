@@ -1,11 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [authStatus, setAuthStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = async (e) => {
+  // Check authentication capabilities on component mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${apiUrl}/api/auth/status`);
+        const data = await response.json();
+        setAuthStatus(data);
+      } catch (err) {
+        console.error('Failed to check auth status:', err);
+        // Default to demo mode if status check fails
+        setAuthStatus({ 
+          demoMode: true, 
+          oauthAvailable: false, 
+          databaseConnected: false 
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuthStatus();
+  }, []);
+
+  const handleDemoSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (!email) {
@@ -35,35 +60,96 @@ function Login({ onLogin }) {
     }
   };
 
+  const handleOAuthLogin = () => {
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    window.location.href = `${apiUrl}/api/auth/google`;
+  };
+
+  if (loading) {
+    return (
+      <div className="auth-container glass-effect">
+        <h2>🔍 Checking Authentication Options...</h2>
+        <p>Please wait while we detect available login methods.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="auth-container glass-effect">
-      <h2>🎭 Demo Login</h2>
-      <div style={{background: '#f0f8ff', border: '1px solid #bee5eb', borderRadius: '8px', padding: '15px', marginBottom: '20px'}}>
-        <h4 style={{margin: '0 0 10px 0', color: '#0c5460'}}>✨ Demo Mode - No Real Account Needed!</h4>
-        <p style={{color: '#495057', fontSize: '14px', margin: '5px 0'}}>
-          • Just enter any email address<br/>
-          • No password required<br/>
-          • Try: demo@example.com, test@gmail.com, or your own email
+      <h2>🔐 Login to AdmuseEasy</h2>
+      
+      {/* OAuth Login Option (if available) */}
+      {authStatus?.oauthAvailable && (
+        <div style={{marginBottom: '30px'}}>
+          <div style={{background: '#e8f5e8', border: '1px solid #c3e6cb', borderRadius: '8px', padding: '15px', marginBottom: '15px'}}>
+            <h4 style={{margin: '0 0 10px 0', color: '#155724'}}>🚀 Quick Login with Google</h4>
+            <p style={{color: '#495057', fontSize: '14px', margin: '5px 0'}}>
+              • Secure OAuth authentication<br/>
+              • Your data is saved {authStatus?.databaseConnected ? 'in the cloud' : 'locally'}<br/>
+              • One-click login with your Google account
+            </p>
+          </div>
+          <button 
+            onClick={handleOAuthLogin}
+            style={{
+              background: '#db4437', 
+              border: 'none', 
+              width: '100%',
+              padding: '12px',
+              fontSize: '16px',
+              marginBottom: '20px'
+            }}
+          >
+            🔐 Continue with Google
+          </button>
+          
+          {authStatus?.demoMode && (
+            <div style={{textAlign: 'center', margin: '20px 0'}}>
+              <span style={{color: '#6c757d'}}>────── or ──────</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Demo Login Option */}
+      {authStatus?.demoMode && (
+        <div>
+          <div style={{background: '#f0f8ff', border: '1px solid #bee5eb', borderRadius: '8px', padding: '15px', marginBottom: '20px'}}>
+            <h4 style={{margin: '0 0 10px 0', color: '#0c5460'}}>✨ Demo Mode - Try Without Account</h4>
+            <p style={{color: '#495057', fontSize: '14px', margin: '5px 0'}}>
+              • Just enter any email address<br/>
+              • No password required<br/>
+              • Try: demo@example.com, test@gmail.com, or your own email
+            </p>
+          </div>
+          <form onSubmit={handleDemoSubmit}>
+            <input
+              type="email"
+              placeholder="Enter any email (demo@example.com)"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              style={{marginBottom: '10px'}}
+            />
+            <button type="submit" style={{background: '#28a745', border: 'none'}}>
+              🎭 Enter Demo Mode
+            </button>
+            {error && <div className="auth-error">{error}</div>}
+          </form>
+        </div>
+      )}
+
+      {/* Status Information */}
+      <div style={{marginTop: '20px', padding: '10px', background: '#f8f9fa', borderRadius: '5px', fontSize: '12px'}}>
+        <p style={{margin: '0', color: '#6c757d'}}>
+          Authentication Status: 
+          {authStatus?.oauthAvailable && <span style={{color: '#28a745'}}> ✅ OAuth</span>}
+          {authStatus?.databaseConnected && <span style={{color: '#28a745'}}> ✅ Database</span>}
+          {authStatus?.demoMode && <span style={{color: '#ffc107'}}> ✅ Demo</span>}
         </p>
       </div>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Enter any email (demo@example.com)"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{marginBottom: '10px'}}
-        />
-        <button type="submit" style={{background: '#28a745', border: 'none'}}>
-          🚀 Enter Demo
-        </button>
-        {error && <div className="auth-error">{error}</div>}
-      </form>
-      <p>Want to try signup instead? <Link to="/signup">Demo Signup</Link></p>
-      <p style={{fontSize: '12px', color: '#6c757d', marginTop: '15px'}}>
-        💡 This is a demonstration - no real data is stored
-      </p>
+
+      <p>Want to try signup instead? <Link to="/signup">Sign Up</Link></p>
     </div>
   );
 }

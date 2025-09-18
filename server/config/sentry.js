@@ -84,35 +84,10 @@ const sentryRequestHandler = () => {
   }
 };
 
-// Tracing middleware - simplified for newer Sentry versions
+// Tracing middleware - disabled to avoid API compatibility issues
 const sentryTracingHandler = () => {
-  if (!sentryInitialized) {
-    return (req, res, next) => next();
-  }
-  
-  try {
-    return (req, res, next) => {
-      // Create a transaction for this request
-      const transaction = Sentry.startTransaction({
-        op: 'http.server',
-        name: `${req.method} ${req.route?.path || req.url}`,
-      });
-      
-      // Set the transaction on the scope
-      Sentry.getCurrentScope().setSpan(transaction);
-      
-      // Finish the transaction when the response ends
-      res.on('finish', () => {
-        transaction.setHttpStatus(res.statusCode);
-        transaction.finish();
-      });
-      
-      next();
-    };
-  } catch (err) {
-    console.error('Sentry tracingHandler failed:', err);
-    return (req, res, next) => next();
-  }
+  // Return a no-op middleware to avoid Sentry API issues
+  return (req, res, next) => next();
 };
 
 // Middleware to capture Express.js errors

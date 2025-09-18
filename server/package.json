@@ -23,7 +23,6 @@
     "@google/generative-ai": "^0.2.1",
     "@sentry/node": "^10.11.0",
     "@sentry/react": "^10.11.0",
-    "@sentry/tracing": "^7.120.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",

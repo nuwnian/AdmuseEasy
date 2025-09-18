@@ -26,7 +26,7 @@ const User = require('./models/User');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Database connection with optional fallback for demo mode
+// Database connection with hybrid support and Atlas fallback
 const connectDB = async () => {
   try {
     // Check if we should skip database connection for demo mode
@@ -35,44 +35,38 @@ const connectDB = async () => {
       return;
     }
     
-    // Determine which database to use based on DB_MODE
-    const dbMode = process.env.DB_MODE || 'local';
+    // Determine which database to use based on configuration
     let mongoURI;
     
-    if (dbMode === 'atlas') {
-      mongoURI = process.env.MONGODB_ATLAS;
-      console.log('🌐 Using Atlas MongoDB (Cloud - Multi-device access)');
+    // Priority: Atlas (production) > Local (development)
+    if (process.env.MONGODB_ATLAS_URI) {
+      mongoURI = process.env.MONGODB_ATLAS_URI;
+      console.log('🌐 Using MongoDB Atlas (Cloud)');
+    } else if (process.env.MONGODB_LOCAL) {
+      mongoURI = process.env.MONGODB_LOCAL;
+      console.log('🏠 Using Local MongoDB (Development)');
     } else {
-      mongoURI = process.env.MONGODB_LOCAL || 'mongodb://localhost:27017/admuse-easy';
-      console.log('🏠 Using Local MongoDB (Development - Fast & reliable)');
+      mongoURI = 'mongodb://localhost:27017/admuse-easy';
+      console.log('🏠 Using Default Local MongoDB');
     }
     
-    console.log('Database mode:', dbMode);
     console.log('Attempting to connect to MongoDB...');
     
     await mongoose.connect(mongoURI, {
       // Connection options to handle timeouts and retries
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      serverSelectionTimeoutMS: 10000, // Timeout after 10s
       socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
       maxPoolSize: 10, // Maintain up to 10 socket connections
-      minPoolSize: 5, // Maintain a minimum of 5 socket connections
+      minPoolSize: 2, // Maintain a minimum of 2 socket connections
       retryWrites: true,
       w: 'majority'
     });
     
-    console.log(`✅ MongoDB connected successfully (${dbMode} mode)`);
+    console.log(`✅ MongoDB connected successfully`);
   } catch (error) {
-    const dbMode = process.env.DB_MODE || 'local';
-    console.error(`❌ MongoDB connection error (${dbMode} mode):`, error.message);
-    
-    // If Atlas fails, suggest fallback
-    if (dbMode === 'atlas') {
-      console.log('💡 Tip: Set DB_MODE=local in .env to use local database');
-    }
-    console.error('Full error:', error);
-    
-    // Don't exit the process, continue without database for demo
-    console.log('🎭 Continuing in demo mode without database connection...');
+    console.error(`❌ MongoDB connection error:`, error.message);
+    console.log('🎭 Falling back to demo mode without database...');
+    // Don't exit the process, continue in demo mode
   }
 };
 
@@ -88,8 +82,10 @@ app.use(helmet());
 app.use(sentryRequestHandler());
 app.use(sentryTracingHandler());
 
-// Session and Passport configuration (optional for demo mode)
-if (process.env.DEMO_MODE !== 'true') {
+// Session and Passport configuration (only when OAuth is available)
+const hasOAuth = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.DEMO_MODE !== 'true');
+
+if (hasOAuth) {
   // Session configuration for OAuth
   app.use(session({
     secret: process.env.JWT_SECRET || 'fallback-secret',
@@ -103,7 +99,7 @@ if (process.env.DEMO_MODE !== 'true') {
   app.use(passport.session());
   console.log('🔐 OAuth session support enabled');
 } else {
-  console.log('🎭 Demo mode - OAuth session support disabled');
+  console.log('🎭 OAuth session support disabled - demo mode or missing credentials');
 }
 
 // Security: Restrict CORS to specific origins

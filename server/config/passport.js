@@ -2,10 +2,8 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 
-// OAuth disabled for demo deployment - using mock authentication instead
-/* 
-// Only configure Google Strategy if credentials are available
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+// Hybrid OAuth configuration - supports both demo and full OAuth modes
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.DEMO_MODE !== 'true') {
   const baseURL = process.env.WEBSITE_HOSTNAME 
     ? `https://${process.env.WEBSITE_HOSTNAME}` 
     : 'http://localhost:5000';
@@ -52,11 +50,12 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       return done(error, null);
     }
   }));
+  console.log('🔐 Google OAuth Strategy configured');
+} else if (process.env.DEMO_MODE === 'true') {
+  console.log('🎭 Demo mode - OAuth disabled');
 } else {
-  console.log('Google OAuth credentials not configured, skipping Google Strategy setup');
+  console.log('⚠️  Google OAuth credentials not configured - falling back to demo mode');
 }
-*/
-console.log('OAuth disabled for demo - using mock authentication');
 
 passport.serializeUser((user, done) => {
   done(null, user._id);
