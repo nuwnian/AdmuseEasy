@@ -47,34 +47,17 @@ jobs:
         cache-to: type=gha,mode=max
         platforms: linux/amd64
     
-    - name: Login to Azure
-      uses: azure/login@v1
+    - name: Deploy to Azure Web App for Containers
+      uses: azure/webapps-deploy@v3
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_CONTAINER }}
+        images: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
     
-    - name: Set Azure Web App Container Settings
+    - name: Wait for deployment
       run: |
-        az webapp config container set \
-          --name ${{ env.AZURE_WEBAPP_NAME }} \
-          --resource-group AdmuseEasy_group \
-          --docker-custom-image-name ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-          --docker-registry-server-url https://${{ env.CONTAINER_REGISTRY }} \
-          --docker-registry-server-user ${{ secrets.AZURE_REGISTRY_USERNAME }} \
-          --docker-registry-server-password ${{ secrets.AZURE_REGISTRY_PASSWORD }}
-    
-    - name: Configure App Service Runtime
-      run: |
-        # Set the app to use Docker container runtime
-        az webapp config set \
-          --name ${{ env.AZURE_WEBAPP_NAME }} \
-          --resource-group AdmuseEasy_group \
-          --linux-fx-version "DOCKER|${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-    
-    - name: Restart Azure Web App
-      run: |
-        az webapp restart \
-          --name ${{ env.AZURE_WEBAPP_NAME }} \
-          --resource-group AdmuseEasy_group
+        echo "Waiting for Azure Web App to start with new container..."
+        sleep 60
     
     - name: Simple Health Check
       run: |
