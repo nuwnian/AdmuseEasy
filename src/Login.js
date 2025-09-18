@@ -35,10 +35,15 @@ function Login() {
 
   return (
     <div className="auth-container glass-effect">
-      <h2>Demo Login</h2>
-      <p style={{color: '#666', fontSize: '14px', marginBottom: '20px'}}>
-        Just enter any email - no password required for demo!
-      </p>
+      <h2>🎭 Demo Login</h2>
+      <div style={{background: '#f0f8ff', border: '1px solid #bee5eb', borderRadius: '8px', padding: '15px', marginBottom: '20px'}}>
+        <h4 style={{margin: '0 0 10px 0', color: '#0c5460'}}>✨ Demo Mode - No Real Account Needed!</h4>
+        <p style={{color: '#495057', fontSize: '14px', margin: '5px 0'}}>
+          • Just enter any email address<br/>
+          • No password required<br/>
+          • Try: demo@example.com, test@gmail.com, or your own email
+        </p>
+      </div>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
@@ -46,11 +51,17 @@ function Login() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          style={{marginBottom: '10px'}}
         />
-        <button type="submit">Demo Login</button>
+        <button type="submit" style={{background: '#28a745', border: 'none'}}>
+          🚀 Enter Demo
+        </button>
         {error && <div className="auth-error">{error}</div>}
       </form>
-      <p>Don't have an account? <a href="/signup">Sign up</a></p>
+      <p>Want to try signup instead? <a href="/signup">Demo Signup</a></p>
+      <p style={{fontSize: '12px', color: '#6c757d', marginTop: '15px'}}>
+        💡 This is a demonstration - no real data is stored
+      </p>
     </div>
   );
 }

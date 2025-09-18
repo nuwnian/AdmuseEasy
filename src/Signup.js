@@ -36,29 +36,41 @@ function Signup() {
 
   return (
     <div className="auth-container glass-effect">
-      <h2>Demo Sign Up</h2>
-      <p style={{color: '#666', fontSize: '14px', marginBottom: '20px'}}>
-        No passwords needed - just enter your email and name for demo!
-      </p>
+      <h2>🎭 Demo Signup</h2>
+      <div style={{background: '#f8f9fa', border: '1px solid #dee2e6', borderRadius: '8px', padding: '15px', marginBottom: '20px'}}>
+        <h4 style={{margin: '0 0 10px 0', color: '#495057'}}>✨ Create Demo Account</h4>
+        <p style={{color: '#495057', fontSize: '14px', margin: '5px 0'}}>
+          • No password required<br/>
+          • Just email and name<br/>
+          • Try: demo@example.com + "Demo User"
+        </p>
+      </div>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Email (demo@example.com)"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
+          style={{marginBottom: '10px'}}
         />
         <input
           type="text"
-          placeholder="Your Name"
+          placeholder="Your Name (Demo User)"
           value={name}
           onChange={e => setName(e.target.value)}
           required
+          style={{marginBottom: '10px'}}
         />
-        <button type="submit">Demo Sign Up</button>
+        <button type="submit" style={{background: '#007bff', border: 'none'}}>
+          🚀 Create Demo Account
+        </button>
         {error && <div className="auth-error">{error}</div>}
       </form>
-      <p>Already have an account? <a href="/login">Login</a></p>
+      <p>Already have an account? <a href="/login">Demo Login</a></p>
+      <p style={{fontSize: '12px', color: '#6c757d', marginTop: '15px'}}>
+        💡 This is a demonstration - no real data is stored
+      </p>
     </div>
   );
 }
