@@ -29,7 +29,8 @@ ENV NODE_ENV=production
 ENV PORT=5000
 ENV WEBSITE_HOSTNAME=admuse-easy.azurewebsites.net
 ENV GOOGLE_API_KEY=dummy-key-for-startup
-# ENV DEMO_MODE=true  # Commented out - let environment control this
+# Explicitly disable demo mode for production
+ENV DEMO_MODE=false
 
 # Create non-root user for security (commented out for Azure compatibility)
 # RUN addgroup -g 1001 -S nodejs
