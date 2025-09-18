@@ -39,43 +39,33 @@ COPY server/ ./
 # Copy built client from previous stage
 COPY --from=client-build /app/client/build ./client/build
 
-# Set production environment variables for Azure Web Apps
+# Set production environment variables
 ENV NODE_ENV=production
 ENV PORT=8080
 ENV DEMO_MODE=false
-ENV WEBSITE_HOSTNAME=admuse-easy.azurewebsites.net
+ENV WEBSITE_HOSTNAME=localhost
 ENV GOOGLE_API_KEY=dummy-key-for-startup
 
 # Azure Web Apps specific environment variables
 ENV WEBSITES_ENABLE_APP_SERVICE_STORAGE=false
 ENV WEBSITES_PORT=8080
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+# Create logs directory
+RUN mkdir -p /app/logs && chmod 755 /app/logs
 
-# Create logs directory with proper permissions
-RUN mkdir -p /app/logs && chmod 755 /app/logs && chown nodejs:nodejs /app/logs
+# Create startup script for Railway/Azure compatibility
+RUN printf '#!/bin/bash\necho "🚀 Starting AdmuseEasy..."\necho "Environment: $NODE_ENV"\necho "Demo Mode: $DEMO_MODE"\necho "Port: $PORT"\necho "Node Version: $(node --version)"\necho "Starting server..."\nexec "$@"\n' > /app/start.sh && \
+    chmod +x /app/start.sh
 
-# Add a startup script optimized for Azure Web Apps
-RUN echo '#!/bin/bash\necho "🚀 Starting AdmuseEasy on Azure Web Apps..."\necho "Environment: $NODE_ENV"\necho "Demo Mode: $DEMO_MODE"\necho "Port: $PORT"\necho "Platform: Azure Web Apps (Linux Container)"\necho "Node Version: $(node --version)"\necho "Starting server..."\nexec "$@"' > /app/start.sh && \
-    chmod +x /app/start.sh && \
-    chown nodejs:nodejs /app/start.sh
-
-# Change ownership to nodejs user
-RUN chown -R nodejs:nodejs /app
-
-# Switch to non-root user
-USER nodejs
-
-# Expose the port Azure Web Apps expects
+# Expose the port
 EXPOSE 8080
 
-# Health check optimized for Azure Web Apps
+# Health check
 HEALTHCHECK --interval=60s --timeout=30s --start-period=90s --retries=5 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/health || exit 1
 
-# Use dumb-init to handle signals properly in Azure containers
+# Use dumb-init for proper signal handling
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-# Start with the Azure-optimized startup script
-CMD ["/app/start.sh", "node", "index.js"]
+# Start with direct node command for Railway compatibility
+CMD ["node", "index.js"]
