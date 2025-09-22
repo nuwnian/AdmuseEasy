@@ -139,66 +139,71 @@ const AdGenerator = ({isLoggedIn, user, handleLogout}) => {
 
     return (
       <div className="app">
-      <div className="dashboard">
-      <div className="input-section">
-        <div className="input-group">
-          <label>Product Name</label>
-          <input name="name" value={product.name} onChange={handleInput} placeholder="e.g. Organic lemongrass soap" />
-        </div>
-        <div className="input-group">
-          <label>Description</label>
-          <textarea name="description" value={product.description} onChange={handleInput} placeholder="Describe your product..." />
-        </div>
-        <div className="input-group">
-          <label>Target Audience</label>
-          <input name="audience" value={product.audience} onChange={handleInput} placeholder="e.g. Eco-conscious millennials" />
-        </div>
-        <div className="input-group">
-          <label>Mascot & Mood</label>
-          <div className="mascot-options">
-            {mascots.map(m => (
-              <label key={m.key} className={mascot === m.key ? 'selected' : ''}>
-                <input type="radio" name="mascot" value={m.key} checked={mascot === m.key} onChange={() => setMascot(m.key)} />
-                <img src={m.icon} alt={m.name} className="mascot-icon" style={{ width: 40, height: 40, marginRight: 8, verticalAlign: 'middle' }} />
-                <div className="mascot-info">
-                  <div><b>{m.name}</b> <span className="mood">({m.mood})</span></div>
-                  <div className="desc">{m.description}</div>
-                </div>
-              </label>
-            ))}
+        <section className="hero-section">
+          <div className="hero-content">
+            <img src="/Admuse-Logo.png" alt="AdmuseEasy mascot" className="hero-mascot" />
+            <h1 className="hero-headline">Create Stunning Ads Instantly</h1>
+            <p className="hero-subheading">AdmuseEasy helps you generate high-converting ad copy and layouts in seconds. No design or writing skills needed—just describe your product and let our mascots do the magic.</p>
           </div>
-        </div>
-
-        <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-              Generating...
+        </section>
+        <div className="dashboard">
+          <div className="input-section">
+            <div className="input-group">
+              <label>Product Name</label>
+              <input name="name" value={product.name} onChange={handleInput} placeholder="e.g. Organic lemongrass soap" />
             </div>
-          ) : (
-            'Generate Ad'
-          )}
-        </button>
-      </div>
-      {adResult && (
-        <div className="result-section">
-          <h2>Generated Ad</h2>
-          <div className="ad-layout" dangerouslySetInnerHTML={{ __html: adResult.layout }} />
-          <div className="ad-copy">
-            <h3>Copywriting</h3>
-            <p><b>Headline:</b> {adResult.copy.headline}</p>
-            <p><b>Tagline:</b> {adResult.copy.tagline}</p>
-            <p><b>CTA:</b> {adResult.copy.cta}</p>
-            <p><b>Blurb:</b> {adResult.copy.blurb}</p>
+            <div className="input-group">
+              <label>Description</label>
+              <textarea name="description" value={product.description} onChange={handleInput} placeholder="Describe your product..." />
+            </div>
+            <div className="input-group">
+              <label>Target Audience</label>
+              <input name="audience" value={product.audience} onChange={handleInput} placeholder="e.g. Eco-conscious millennials" />
+            </div>
+            <div className="input-group">
+              <label>Mascot & Mood</label>
+              <div className="mascot-options">
+                {mascots.map(m => (
+                  <label key={m.key} className={mascot === m.key ? 'selected' : ''}>
+                    <input type="radio" name="mascot" value={m.key} checked={mascot === m.key} onChange={() => setMascot(m.key)} />
+                    <img src={m.icon} alt={m.name} className="mascot-icon" style={{ width: 40, height: 40, marginRight: 8, verticalAlign: 'middle' }} />
+                    <div className="mascot-info">
+                      <div><b>{m.name}</b> <span className="mood">({m.mood})</span></div>
+                      <div className="desc">{m.description}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
+              {loading ? (
+                <div className="loading-spinner">
+                  <div className="spinner"></div>
+                  Generating...
+                </div>
+              ) : (
+                'Generate Ad'
+              )}
+            </button>
           </div>
+          {adResult && (
+            <div className="result-section">
+              <h2>Generated Ad</h2>
+              <div className="ad-layout" dangerouslySetInnerHTML={{ __html: adResult.layout }} />
+              <div className="ad-copy">
+                <h3>Copywriting</h3>
+                <p><b>Headline:</b> {adResult.copy.headline}</p>
+                <p><b>Tagline:</b> {adResult.copy.tagline}</p>
+                <p><b>CTA:</b> {adResult.copy.cta}</p>
+                <p><b>Blurb:</b> {adResult.copy.blurb}</p>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-      </div>
-      
-      {/* Footer */}
-      <footer className="footer">
-        <p>© 2025 AdmuseEasy • Made with 💙 for creative marketers</p>
-      </footer>
+        {/* Footer */}
+        <footer className="footer">
+          <p>© 2025 AdmuseEasy • Made with 💙 for creative marketers</p>
+        </footer>
       </div>
     );
   };
@@ -264,8 +269,11 @@ function App() {
           </button>
           <div className={`nav-links${mobileNavOpen ? ' nav-links--open' : ''}`}>
             <Link to="/" onClick={() => trackUserAction('nav_click', 'home')}>Ad Generator</Link>
+            <div className="nav-section-divider"></div>
             <Link to="/about" onClick={() => trackUserAction('nav_click', 'about')}>About</Link>
+            <div className="nav-section-divider"></div>
             <Link to="/qa-docs" onClick={() => trackUserAction('nav_click', 'qa_docs')}>QA Documentation</Link>
+            <div className="nav-section-divider"></div>
             {isLoggedIn ? (
               <div className="auth-links">
                 <span className="user-info">👤 {user?.email}</span>
